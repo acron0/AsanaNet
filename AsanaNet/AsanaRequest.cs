@@ -23,6 +23,11 @@ namespace AsanaNet
         private Action<string, WebHeaderCollection> _callback;
 
         /// <summary>
+        /// The error callback
+        /// </summary>
+        private Action<string, string> _error;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="request"></param>
@@ -34,17 +39,12 @@ namespace AsanaNet
         /// <summary>
         /// Begins the request
         /// </summary>
-        public void Go(Action<string, WebHeaderCollection> callback)
+        public void Go(Action<string, WebHeaderCollection> callback, Action<string, string> error)
         {
             _callback = callback;
-            try
-            {
-                IAsyncResult result = _request.BeginGetResponse(new AsyncCallback(ResponseCallback), null);
-            }
-            catch (System.Exception ex)
-            {
-                throw ex;
-            }
+            _error = error;
+            IAsyncResult result = _request.BeginGetResponse(new AsyncCallback(ResponseCallback), null);
+
         }
 
         /// <summary>
@@ -61,9 +61,10 @@ namespace AsanaNet
             {
                 response = (HttpWebResponse)request.EndGetResponse(result);
             }
-            catch (System.Exception ex)
+            catch (System.Net.WebException ex)
             {
-                throw ex;
+                _error(ex.Response.ResponseUri.AbsoluteUri, ex.Message);
+                return;
             }            
 
             Encoding enc = Encoding.GetEncoding(1252);

@@ -44,10 +44,12 @@
     <Compile Include="AsanaFunction.cs" />
     <Compile Include="AsanaObject.cs" />
     <Compile Include="AsanaRequest.cs" />
+    <Compile Include="AsanaTask.cs" />
     <Compile Include="AsanaUser.cs" />
     <Compile Include="AsanaWorkspace.cs" />
     <Compile Include="MiniJSON.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

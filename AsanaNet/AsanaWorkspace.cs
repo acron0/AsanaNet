@@ -7,13 +7,13 @@ namespace AsanaNet
 {
     public class AsanaWorkspace : IAsanaObject
     {
-        public string Name { get; private set; }
-        public string ID { get; private set; }
+        public string Name  { get; private set; }
+        public Int64  ID    { get; private set; }
 
         public void Parse(Dictionary<string, object> data)
         {
-            Name    = data["name"].ToString();
-            ID      = data["id"].ToString();
+            Name    = Utils.SafeAssignString(data, "name");
+            ID      = Utils.SafeAssign<Int64>(data, "id");
         }
     }
 }

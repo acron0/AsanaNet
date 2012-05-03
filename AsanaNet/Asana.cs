@@ -17,7 +17,16 @@ namespace AsanaNet
     {        
         #region Variables
 
+        /// <summary>
+        /// The URL we use to prefix all the requests
+        /// e.g. https://app.asana.com/api/1.0
+        /// </summary>
         private string _baseUrl;
+
+        /// <summary>
+        /// An error callback for the outside world
+        /// </summary>
+        private Action<string, string> _errorCallback;
 
         #endregion
 
@@ -37,9 +46,18 @@ namespace AsanaNet
 
         #region REST Functions
 
-        private AsanaFunction Users     = new AsanaFunction("users",        "GET");
-        private AsanaFunction UsersMe   = new AsanaFunction("users/me",     "GET");
-        private AsanaFunction UsersId   = new AsanaFunction("users/{0}",    "GET");
+        #region GET
+
+        private AsanaFunction Users             = new AsanaFunction("/users", "GET");
+        private AsanaFunction UsersMe           = new AsanaFunction("/users/me", "GET");
+        private AsanaFunction UsersId           = new AsanaFunction("/users/{0}", "GET");
+
+        private AsanaFunction WorkspaceUsers    = new AsanaFunction("/workspaces/{0}/users", "GET");
+        private AsanaFunction WorkspaceTasks    = new AsanaFunction("/workspaces/{0}/tasks?&assignee=me", "GET");
+
+        private AsanaFunction TaskId            = new AsanaFunction("/tasks/{0}", "GET");
+
+        #endregion        
 
         #endregion
 
@@ -49,9 +67,10 @@ namespace AsanaNet
         /// Creates a new Asana entry point.
         /// </summary>
         /// <param name="apiKey">The API key for the account we intend to access</param>
-        public Asana(string apiKey)
+        public Asana(string apiKey, Action<string, string> errorCallback)
         {   
-            _baseUrl = "https://app.asana.com/api/1.0/";
+            _baseUrl = "https://app.asana.com/api/1.0";
+            _errorCallback = errorCallback;
 
             APIKey = apiKey;
             EncodedAPIKey = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(apiKey + ":"));
@@ -69,63 +88,6 @@ namespace AsanaNet
             request.Headers["Authorization"] = "Basic " + EncodedAPIKey;
             request.Method = function.Method;
             return new AsanaRequest(request);
-        }
-
-        /// <summary>
-        /// Returns the user data for the current user.
-        /// </summary>
-        /// <returns></returns>
-        public void GetMyUserData(AsanaResponseEventHandler callback)
-        {
-            var request = GetBaseRequest(UsersMe);
-            request.Go((o,h) =>
-            {
-                var u = new AsanaUser();
-                u.Parse(GetDataAsDict(o));
-
-                callback( u );
-            });
-        }
-
-        /// <summary>
-        /// Returns the user data for all visible users.
-        /// </summary>
-        /// <param name="id">ID of the user</param>
-        /// <param name="callback"></param>
-        public void GetUserData(AsanaCollectionResponseEventHandler callback)
-        {
-            var request = GetBaseRequest(Users);
-            request.Go((o, h) =>
-            {
-                var k = GetDataAsDictArray(o);
-                AsanaObjectCollection collection = new AsanaObjectCollection();
-                foreach (var j in k)
-                {
-                   var u = new AsanaUser();
-                   u.Parse(j);
-                   collection.Add(u);
-                }
-
-                callback(collection);
-                //
-            });
-        }
-
-        /// <summary>
-        /// Returns the user data for a given user.
-        /// </summary>
-        /// <param name="id">ID of the user</param>
-        /// <param name="callback"></param>
-        public void GetUserData(Int64 id, AsanaResponseEventHandler callback)
-        {
-            var request = GetBaseRequest(UsersId, id);
-            request.Go((o, h) =>
-            {
-                var u = new AsanaUser();
-                u.Parse(GetDataAsDict(o));
-
-                callback(u);
-            });
         }
 
         /// <summary>
@@ -154,6 +116,115 @@ namespace AsanaNet
                 data3[i] = data2[i] as Dictionary<string, object>;
             return data3;
         }
+
+        /// <summary>
+        /// The callback for response errors
+        /// </summary>
+        /// <param name="error"></param>
+        internal void ErrorCallback(string requestString, string error)
+        {
+            _errorCallback(requestString, error);
+        }
+
+        /// <summary>
+        /// Packs the data and into a collection object and sends it to the callback
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="callback"></param>
+        internal void PackAndSendResponseCollection<T>(string rawData, AsanaCollectionResponseEventHandler callback) where T : IAsanaObject, new()
+        {
+            var k = GetDataAsDictArray(rawData);
+            AsanaObjectCollection collection = new AsanaObjectCollection();
+            foreach (var j in k)
+            {
+                var t = new T();
+                t.Parse(j);
+                collection.Add(t);
+            }
+
+            callback(collection);
+        }
+
+        /// <summary>
+        /// Packs the data and into a response object and sends it to the callback
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="callback"></param>
+        internal void PackAndSendResponse<T>(string rawData, AsanaResponseEventHandler callback) where T : IAsanaObject, new()
+        {
+            var u = new T();
+            u.Parse(GetDataAsDict(rawData));
+            callback(u);
+        }
+
+        #endregion
+
+        #region Function Impl
+
+        /// <summary>
+        /// Returns the user data for the current user.
+        /// </summary>
+        /// <returns></returns>
+        public void GetMyUser(AsanaResponseEventHandler callback)
+        {
+            var request = GetBaseRequest(UsersMe);
+            request.Go((o, h) => PackAndSendResponse<AsanaUser>(o, callback), ErrorCallback);
+        }
+
+        /// <summary>
+        /// Returns the user data for all visible users.
+        /// </summary>
+        /// <param name="id">ID of the user</param>
+        /// <param name="callback"></param>
+        public void GetUsers(AsanaCollectionResponseEventHandler callback)
+        {
+            var request = GetBaseRequest(Users);
+            request.Go((o, h) => PackAndSendResponseCollection<AsanaUser>(o, callback), ErrorCallback);
+        }
+
+        /// <summary>
+        /// Returns the user data for a given user.
+        /// </summary>
+        /// <param name="id">ID of the user</param>
+        /// <param name="callback"></param>
+        public void GetUser(Int64 id, AsanaResponseEventHandler callback)
+        {
+            var request = GetBaseRequest(UsersId, id);
+            request.Go((o, h) => PackAndSendResponse<AsanaUser>(o, callback), ErrorCallback);
+        }
+
+        /// <summary>
+        /// Returns the workspace data for a given workspace
+        /// </summary>
+        /// <param name="id">ID of the workspace</param>
+        /// <param name="callback"></param>
+        public void GetWorkspaceUsers(Int64 id, AsanaCollectionResponseEventHandler callback)
+        {
+            var request = GetBaseRequest(WorkspaceUsers, id);
+            request.Go((o, h) => PackAndSendResponseCollection<AsanaUser>(o, callback), ErrorCallback);
+        }
+
+        /// <summary>
+        /// Returns the tasks for the current user
+        /// </summary>
+        /// <param name="workspaceId">ID of the workspace</param>
+        /// <param name="callback"></param>
+        public void GetMyWorkspaceTasks(Int64 workspaceId, AsanaCollectionResponseEventHandler callback)
+        {
+            var request = GetBaseRequest(WorkspaceTasks, workspaceId);
+            request.Go((o, h) => PackAndSendResponseCollection<AsanaTask>(o, callback), ErrorCallback);
+        }
+
+        /// <summary>
+        /// Returns the task data for a given task.
+        /// </summary>
+        /// <param name="id">ID of the task</param>
+        /// <param name="callback"></param>
+        public void GetTask(Int64 id, AsanaResponseEventHandler callback)
+        {
+            var request = GetBaseRequest(TaskId, id);
+            request.Go((o, h) => PackAndSendResponse<AsanaTask>(o, callback), ErrorCallback);
+        }       
 
         #endregion
     }
