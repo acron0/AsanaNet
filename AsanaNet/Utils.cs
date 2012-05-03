@@ -25,10 +25,10 @@ namespace AsanaNet
 
             T value = default(T);
 
-            if (source.ContainsKey(name))
+            if (source.ContainsKey(name) && source[name] != null)
             {   
                 TypeConverter converter = TypeDescriptor.GetConverter(typeof(T));
-                if (converter.CanConvertFrom(typeof(string)))
+                if (converter.CanConvertFrom(typeof(string)) && !string.IsNullOrWhiteSpace(source[name].ToString()))
                 {
                     value =  (T)converter.ConvertFromString(source[name].ToString());
                 }
