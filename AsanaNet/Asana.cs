@@ -56,6 +56,12 @@ namespace AsanaNet
         private AsanaFunction WorkspaceTasks    = new AsanaFunction("/workspaces/{0}/tasks?&assignee=me", "GET");
 
         private AsanaFunction TaskId            = new AsanaFunction("/tasks/{0}", "GET");
+        private AsanaFunction TaskStories       = new AsanaFunction("/tasks/{0}/stories", "GET");
+        private AsanaFunction TaskProjects      = new AsanaFunction("/tasks/{0}/projects", "GET");
+        
+        private AsanaFunction StoryId           = new AsanaFunction("/stories/{0}", "GET");
+
+        private AsanaFunction ProjectId         = new AsanaFunction("/projects/{0}", "GET");        
 
         #endregion        
 
@@ -224,7 +230,52 @@ namespace AsanaNet
         {
             var request = GetBaseRequest(TaskId, id);
             request.Go((o, h) => PackAndSendResponse<AsanaTask>(o, callback), ErrorCallback);
-        }       
+        }    
+
+        /// <summary>
+        /// Returns the story data for a given task.
+        /// </summary>
+        /// <param name="id">ID of the task</param>
+        /// <param name="callback"></param>
+        public void GetTaskStories(Int64 id, AsanaCollectionResponseEventHandler callback)
+        {
+            var request = GetBaseRequest(TaskStories, id);
+            request.Go((o, h) => PackAndSendResponseCollection<AsanaStory>(o, callback), ErrorCallback);
+        }  
+
+        /// <summary>
+        /// Returns the story data for a given id.
+        /// </summary>
+        /// <param name="id">ID of the story</param>
+        /// <param name="callback"></param>
+        public void GetStory(Int64 id, AsanaResponseEventHandler callback)
+        {
+            var request = GetBaseRequest(StoryId, id);
+            request.Go((o, h) => PackAndSendResponse<AsanaStory>(o, callback), ErrorCallback);
+        }  
+ 
+        /// <summary>
+        /// Returns the project data for a given task.
+        /// </summary>
+        /// <param name="id">ID of the task</param>
+        /// <param name="callback"></param>
+        public void GetTaskProjects(Int64 id, AsanaCollectionResponseEventHandler callback)
+        {
+            var request = GetBaseRequest(TaskProjects, id);
+            request.Go((o, h) => PackAndSendResponseCollection<AsanaProject>(o, callback), ErrorCallback);
+        }
+
+        /// <summary>
+        /// Returns the project data for a given id.
+        /// </summary>
+        /// <param name="id">ID of the project</param>
+        /// <param name="callback"></param>
+        public void GetProject(Int64 id, AsanaResponseEventHandler callback)
+        {
+            var request = GetBaseRequest(ProjectId, id);
+            request.Go((o, h) => PackAndSendResponse<AsanaProject>(o, callback), ErrorCallback);
+        } 
+        
 
         #endregion
     }

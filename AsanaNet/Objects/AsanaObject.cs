@@ -8,6 +8,8 @@ namespace AsanaNet
     public interface IAsanaObject
     {
         void Parse(Dictionary<string, object> data);
+
+        bool Intact { get; }
     }
 
     public interface IAsanaObjectCollection : IList<IAsanaObject>

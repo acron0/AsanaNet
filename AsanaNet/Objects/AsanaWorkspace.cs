@@ -10,6 +10,8 @@ namespace AsanaNet
         public string Name  { get; private set; }
         public Int64  ID    { get; private set; }
 
+        public bool Intact { get { return true; } }
+
         public void Parse(Dictionary<string, object> data)
         {
             Name    = Utils.SafeAssignString(data, "name");

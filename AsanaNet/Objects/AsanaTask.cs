@@ -18,14 +18,15 @@ namespace AsanaNet
         public AsanaUser[]      Followers       { get; private set; }
         public DateTime         ModifiedAt      { get; private set; }
         public string           Notes           { get; private set; }
-        //public AsanaProject[]   Projects        { get; private set; }
+        public AsanaProject[]   Projects        { get; private set; }
         public AsanaWorkspace   Workspace       { get; private set; }
+
+        public bool Intact { get { return Workspace != null; } }
 
         public void Parse(Dictionary<string, object> data)
         {
             Name            = Utils.SafeAssignString(data, "name");
             ID              = Utils.SafeAssign<Int64>(data, "id");
-
             Assignee        = Utils.SafeAssign<AsanaUser>(data, "assignee");
             AssigneeStatus  = Utils.SafeAssignString(data, "assignee_status");
             CreatedAt       = Utils.SafeAssign<DateTime>(data, "created_at");
@@ -34,7 +35,9 @@ namespace AsanaNet
             DueOn           = Utils.SafeAssign<DateTime>(data, "due_on");
             ModifiedAt      = Utils.SafeAssign<DateTime>(data, "modified_at");
             Notes           = Utils.SafeAssignString(data, "notes");
+            Projects        = Utils.SafeAssignArray<AsanaProject>(data, "projects");
             Workspace       = Utils.SafeAssign<AsanaWorkspace>(data, "workspace");
+            Followers       = Utils.SafeAssignArray<AsanaUser>(data, "followers");
         }
     }
 }

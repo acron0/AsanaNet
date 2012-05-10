@@ -12,6 +12,8 @@ namespace AsanaNet
         public Int64            ID              { get; private set; }
         public AsanaWorkspace[] Workspaces      { get; private set; }
 
+        public bool Intact { get { return Workspaces != null; } }
+
         public void Parse(Dictionary<string, object> data)
         {
             Name        = Utils.SafeAssignString(data, "name");
