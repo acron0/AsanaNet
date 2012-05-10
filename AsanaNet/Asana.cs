@@ -52,8 +52,10 @@ namespace AsanaNet
         private AsanaFunction UsersMe           = new AsanaFunction("/users/me", "GET");
         private AsanaFunction UsersId           = new AsanaFunction("/users/{0}", "GET");
 
+        private AsanaFunction Workspaces        = new AsanaFunction("/workspaces", "GET");
         private AsanaFunction WorkspaceUsers    = new AsanaFunction("/workspaces/{0}/users", "GET");
-        private AsanaFunction WorkspaceTasks    = new AsanaFunction("/workspaces/{0}/tasks?&assignee=me", "GET");
+        private AsanaFunction WorkspaceMyTasks  = new AsanaFunction("/workspaces/{0}/tasks?&assignee=me", "GET");
+        private AsanaFunction WorkspaceProjects = new AsanaFunction("/workspaces/{0}/projects", "GET");
 
         private AsanaFunction TaskId            = new AsanaFunction("/tasks/{0}", "GET");
         private AsanaFunction TaskStories       = new AsanaFunction("/tasks/{0}/stories", "GET");
@@ -61,7 +63,8 @@ namespace AsanaNet
         
         private AsanaFunction StoryId           = new AsanaFunction("/stories/{0}", "GET");
 
-        private AsanaFunction ProjectId         = new AsanaFunction("/projects/{0}", "GET");        
+        private AsanaFunction ProjectId         = new AsanaFunction("/projects/{0}", "GET");
+        private AsanaFunction ProjectTasks      = new AsanaFunction("/projects/{0}/tasks", "GET");  
 
         #endregion        
 
@@ -165,15 +168,26 @@ namespace AsanaNet
 
         #endregion
 
-        #region Function Impl
+        #region GET Function Impl
 
         /// <summary>
         /// Returns the user data for the current user.
         /// </summary>
         /// <returns></returns>
-        public void GetMyUser(AsanaResponseEventHandler callback)
+        public void GetUser(AsanaResponseEventHandler callback)
         {
             var request = GetBaseRequest(UsersMe);
+            request.Go((o, h) => PackAndSendResponse<AsanaUser>(o, callback), ErrorCallback);
+        }
+
+        /// <summary>
+        /// Returns the user data for a given user.
+        /// </summary>
+        /// <param name="id">ID of the user</param>
+        /// <param name="callback"></param>
+        public void GetUser(Int64 id, AsanaResponseEventHandler callback)
+        {
+            var request = GetBaseRequest(UsersId, id);
             request.Go((o, h) => PackAndSendResponse<AsanaUser>(o, callback), ErrorCallback);
         }
 
@@ -189,14 +203,13 @@ namespace AsanaNet
         }
 
         /// <summary>
-        /// Returns the user data for a given user.
+        /// Returns the workspace data for all visible workspaces
         /// </summary>
-        /// <param name="id">ID of the user</param>
         /// <param name="callback"></param>
-        public void GetUser(Int64 id, AsanaResponseEventHandler callback)
+        public void GetWorkspaces(AsanaCollectionResponseEventHandler callback)
         {
-            var request = GetBaseRequest(UsersId, id);
-            request.Go((o, h) => PackAndSendResponse<AsanaUser>(o, callback), ErrorCallback);
+            var request = GetBaseRequest(Workspaces);
+            request.Go((o, h) => PackAndSendResponseCollection<AsanaWorkspace>(o, callback), ErrorCallback);
         }
 
         /// <summary>
@@ -211,14 +224,25 @@ namespace AsanaNet
         }
 
         /// <summary>
-        /// Returns the tasks for the current user
+        /// Returns the tasks in the specified workspace
         /// </summary>
         /// <param name="workspaceId">ID of the workspace</param>
         /// <param name="callback"></param>
-        public void GetMyWorkspaceTasks(Int64 workspaceId, AsanaCollectionResponseEventHandler callback)
+        public void GetWorkspaceTasks(Int64 workspaceId, AsanaCollectionResponseEventHandler callback)
         {
-            var request = GetBaseRequest(WorkspaceTasks, workspaceId);
+            var request = GetBaseRequest(WorkspaceMyTasks, workspaceId);
             request.Go((o, h) => PackAndSendResponseCollection<AsanaTask>(o, callback), ErrorCallback);
+        }
+
+        /// <summary>
+        /// Returns the projects in a given workspace
+        /// </summary>
+        /// <param name="workspaceId">ID of the workspace</param>
+        /// <param name="callback"></param>
+        public void GetWorkspaceProjects(Int64 workspaceId, AsanaCollectionResponseEventHandler callback)
+        {
+            var request = GetBaseRequest(WorkspaceProjects, workspaceId);
+            request.Go((o, h) => PackAndSendResponseCollection<AsanaProject>(o, callback), ErrorCallback);
         }
 
         /// <summary>
@@ -275,7 +299,17 @@ namespace AsanaNet
             var request = GetBaseRequest(ProjectId, id);
             request.Go((o, h) => PackAndSendResponse<AsanaProject>(o, callback), ErrorCallback);
         } 
-        
+
+        /// <summary>
+        /// Returns the task data for a given project.
+        /// </summary>
+        /// <param name="id">ID of the project</param>
+        /// <param name="callback"></param>
+        public void GetProjectTasks(Int64 id, AsanaCollectionResponseEventHandler callback)
+        {
+            var request = GetBaseRequest(ProjectTasks, id);
+            request.Go((o, h) => PackAndSendResponseCollection<AsanaTask>(o, callback), ErrorCallback);
+        }
 
         #endregion
     }
