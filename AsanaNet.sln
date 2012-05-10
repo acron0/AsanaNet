@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsanaNet", "AsanaNet\AsanaNet.csproj", "{3740ED7E-52B6-4D40-92CD-DF0FF0E855E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsanaNetTestApp", "AsanaNetTestApp\AsanaNetTestApp.csproj", "{EEE7FCE2-CCA4-4D0A-9791-46F8F0F700AE}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,16 +23,6 @@ Global
 		{3740ED7E-52B6-4D40-92CD-DF0FF0E855E2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{3740ED7E-52B6-4D40-92CD-DF0FF0E855E2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{3740ED7E-52B6-4D40-92CD-DF0FF0E855E2}.Release|x86.ActiveCfg = Release|Any CPU
-		{EEE7FCE2-CCA4-4D0A-9791-46F8F0F700AE}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{EEE7FCE2-CCA4-4D0A-9791-46F8F0F700AE}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{EEE7FCE2-CCA4-4D0A-9791-46F8F0F700AE}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{EEE7FCE2-CCA4-4D0A-9791-46F8F0F700AE}.Debug|x86.ActiveCfg = Debug|x86
-		{EEE7FCE2-CCA4-4D0A-9791-46F8F0F700AE}.Debug|x86.Build.0 = Debug|x86
-		{EEE7FCE2-CCA4-4D0A-9791-46F8F0F700AE}.Release|Any CPU.ActiveCfg = Release|x86
-		{EEE7FCE2-CCA4-4D0A-9791-46F8F0F700AE}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{EEE7FCE2-CCA4-4D0A-9791-46F8F0F700AE}.Release|Mixed Platforms.Build.0 = Release|x86
-		{EEE7FCE2-CCA4-4D0A-9791-46F8F0F700AE}.Release|x86.ActiveCfg = Release|x86
-		{EEE7FCE2-CCA4-4D0A-9791-46F8F0F700AE}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
