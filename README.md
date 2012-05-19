@@ -30,4 +30,4 @@ asana.GetWorkspaces(o =>
     });
 </code>
 
-##Currently, the
+###Currently, only GET requests are implemented. More soon!
