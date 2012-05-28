@@ -7,27 +7,33 @@ namespace AsanaNet
 {
     public class AsanaProject : IAsanaObject
     {
+        [AsanaDataAttribute("name")]
         public string Name { get; private set; }
+
+        [AsanaDataAttribute("id")]
         public Int64 ID { get; private set; }
+
+        [AsanaDataAttribute("created_at")]
         public DateTime CreatedAt { get; private set; }
+
+        [AsanaDataAttribute("modified_at")]
         public DateTime ModifiedAt { get; private set; }
+
+        [AsanaDataAttribute("notes")]
         public string Notes { get; private set; }
+
+        [AsanaDataAttribute("archived")]
         public bool Archived { get; private set; }
+
+        [AsanaDataAttribute("workspace")]
         public AsanaWorkspace Workspace { get; private set; }
+
+        [AsanaDataAttribute("followers")]
         public AsanaUser[] Followers { get; private set; }
+
+        // ------------------------------------------------------
 
         public bool Intact { get { return true; } }
 
-        public void Parse(Dictionary<string, object> data)
-        {
-            Name = Utils.SafeAssignString(data, "name");
-            ID = Utils.SafeAssign<Int64>(data, "id");
-            CreatedAt = Utils.SafeAssign<DateTime>(data, "created_at");
-            ModifiedAt = Utils.SafeAssign<DateTime>(data, "modified_at");
-            Notes = Utils.SafeAssignString(data, "notes");
-            Archived = Utils.SafeAssign<bool>(data, "archived");
-            Workspace = Utils.SafeAssign<AsanaWorkspace>(data, "workspace");
-            Followers = Utils.SafeAssignArray<AsanaUser>(data, "followers");
-        }
     }
 }

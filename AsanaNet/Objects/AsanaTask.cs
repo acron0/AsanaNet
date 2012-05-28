@@ -7,37 +7,59 @@ namespace AsanaNet
 {
     public class AsanaTask : IAsanaObject
     {
+        [AsanaDataAttribute("name")]
         public string           Name            { get; private set; }
+
+        [AsanaDataAttribute("id")]
         public Int64            ID              { get; private set; }
+
+        [AsanaDataAttribute("assignee")]
         public AsanaUser        Assignee        { get; private set; }
+
+        [AsanaDataAttribute("assignee_status")]
         public string           AssigneeStatus  { get; private set; }
+
+        [AsanaDataAttribute("created_at")]
         public DateTime         CreatedAt       { get; private set; }
+
+        [AsanaDataAttribute("completed")]
         public bool             Completed       { get; private set; }
+
+        [AsanaDataAttribute("name")]
         public DateTime         CompletedAt     { get; private set; }
+
+        [AsanaDataAttribute("due_on")]
         public DateTime         DueOn           { get; private set; }
+
+        [AsanaDataAttribute("followers")]
         public AsanaUser[]      Followers       { get; private set; }
+
+        [AsanaDataAttribute("modified_at")]
         public DateTime         ModifiedAt      { get; private set; }
+
+        [AsanaDataAttribute("notes")]
         public string           Notes           { get; private set; }
+
+        [AsanaDataAttribute("projects")]
         public AsanaProject[]   Projects        { get; private set; }
+
+        [AsanaDataAttribute("workspace")]
         public AsanaWorkspace   Workspace       { get; private set; }
+
+        // ------------------------------------------------------
 
         public bool Intact { get { return Workspace != null; } }
 
-        public void Parse(Dictionary<string, object> data)
+        // ------------------------------------------------------
+
+        public AsanaTask()
         {
-            Name            = Utils.SafeAssignString(data, "name");
-            ID              = Utils.SafeAssign<Int64>(data, "id");
-            Assignee        = Utils.SafeAssign<AsanaUser>(data, "assignee");
-            AssigneeStatus  = Utils.SafeAssignString(data, "assignee_status");
-            CreatedAt       = Utils.SafeAssign<DateTime>(data, "created_at");
-            Completed       = Utils.SafeAssign<bool>(data, "completed");
-            CompletedAt     = Utils.SafeAssign<DateTime>(data, "completed_at");
-            DueOn           = Utils.SafeAssign<DateTime>(data, "due_on");
-            ModifiedAt      = Utils.SafeAssign<DateTime>(data, "modified_at");
-            Notes           = Utils.SafeAssignString(data, "notes");
-            Projects        = Utils.SafeAssignArray<AsanaProject>(data, "projects");
-            Workspace       = Utils.SafeAssign<AsanaWorkspace>(data, "workspace");
-            Followers       = Utils.SafeAssignArray<AsanaUser>(data, "followers");
+        }
+
+        public AsanaTask(string name, AsanaWorkspace workspace) 
+        {
+            Workspace = workspace;
+            Name = name;
         }
     }
 }

@@ -3,11 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace AsanaNet
 {
     static class Utils
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         static public string SafeAssignString(Dictionary<string, object> source, string name)
         {
             if (source.ContainsKey(name))
@@ -18,16 +25,23 @@ namespace AsanaNet
             return null;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         static public T SafeAssign<T>(Dictionary<string, object> source, string name) where T : new()
         {
             if (typeof(IAsanaObject).IsAssignableFrom(typeof(T)))
                 return SafeAssignAsanaObject<T>(source, name);
 
-            T value = default(T);
+            TypeConverter converter = TypeDescriptor.GetConverter(typeof(T));
+            T value = default(T);  
 
             if (source.ContainsKey(name) && source[name] != null)
             {   
-                TypeConverter converter = TypeDescriptor.GetConverter(typeof(T));
                 if (converter.CanConvertFrom(typeof(string)) && !string.IsNullOrWhiteSpace(source[name].ToString()))
                 {
                     value =  (T)converter.ConvertFromString(source[name].ToString());
@@ -37,6 +51,13 @@ namespace AsanaNet
             return value;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         static public T[] SafeAssignArray<T>(Dictionary<string, object> source, string name) where T : new()
         {
             if (typeof(IAsanaObject).IsAssignableFrom(typeof(T)))
@@ -51,6 +72,13 @@ namespace AsanaNet
             return value;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         static internal T SafeAssignAsanaObject<T>(Dictionary<string, object> source, string name) where T : new()
         {
             T value = default(T);
@@ -59,12 +87,19 @@ namespace AsanaNet
             {
                 var obj = source[name] as Dictionary<string, object>;
                 value = new T();
-                (value as IAsanaObject).Parse(obj);
+                Utils.Deserialize(obj, (value as IAsanaObject));
             }
 
             return value;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         static internal T[] SafeAssignAsanaObjectArray<T>(Dictionary<string, object> source, string name) where T : new()
         {
             T[] value = null;
@@ -77,12 +112,81 @@ namespace AsanaNet
                 for (int i = 0; i < list.Count; ++i)
                 {
                     T newObj = new T();
-                    (newObj as IAsanaObject).Parse(list[i] as Dictionary<string, object>);
+                    Utils.Deserialize(list[i] as Dictionary<string, object>, (newObj as IAsanaObject));
                     value[i] = newObj;
                 }
             }
 
             return value;
+        }
+
+        /// <summary>
+        /// Deserializes a dictionary based on AsanaDataAttributes
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="obj"></param>
+        static internal void Deserialize(Dictionary<string, object> data, IAsanaObject obj)
+        {
+            foreach(var p in obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                try
+                {
+                    AsanaDataAttribute ca = p.GetCustomAttributes(typeof(AsanaDataAttribute), false)[0] as AsanaDataAttribute;
+                    if(!data.ContainsKey(ca.Name))
+                        continue;
+
+                    if (p.PropertyType.GUID == typeof(string).GUID)
+                    {
+                        p.SetValue(obj, SafeAssignString(data, ca.Name), null);
+                    }
+                    else
+                    {
+                        Type t = p.PropertyType.IsArray ? p.PropertyType.GetElementType() : p.PropertyType;
+                        var method = typeof(Utils).GetMethod(p.PropertyType.IsArray ? "SafeAssignArray" : "SafeAssign").MakeGenericMethod(new Type[] { t });
+                        var methodResult = method.Invoke(null, new object[] { data, ca.Name });
+                        p.SetValue(obj, methodResult, null);
+                    }
+                }
+                catch 
+                { 
+                }
+            }
+        }
+
+        /// <summary>
+        /// Deserializes a dictionary based on AsanaDataAttributes
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="obj"></param>
+        static internal Dictionary<string, object> Serialize(IAsanaObject obj)
+        {
+            var dict = new Dictionary<string, object>();
+
+            // TODO
+            /*foreach (var p in obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                try
+                {
+                    AsanaDataAttribute ca = p.GetCustomAttributes(typeof(AsanaDataAttribute), false)[0] as AsanaDataAttribute;
+
+                    if (p.PropertyType.GUID == typeof(string).GUID)
+                    {
+                        p.SetValue(obj, SafeAssignString(data, ca.Name), null);
+                    }
+                    else
+                    {
+                        Type t = p.PropertyType.IsArray ? p.PropertyType.GetElementType() : p.PropertyType;
+                        var method = typeof(Utils).GetMethod(p.PropertyType.IsArray ? "SafeAssignArray" : "SafeAssign").MakeGenericMethod(new Type[] { t });
+                        var methodResult = method.Invoke(null, new object[] { data, ca.Name });
+                        p.SetValue(obj, methodResult, null);
+                    }
+                }
+                catch
+                {
+                }
+            }*/
+
+            return dict;
         }
     }
 }

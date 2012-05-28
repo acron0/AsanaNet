@@ -7,8 +7,6 @@ namespace AsanaNet
 {
     public interface IAsanaObject
     {
-        void Parse(Dictionary<string, object> data);
-
         bool Intact { get; }
     }
 
@@ -18,5 +16,13 @@ namespace AsanaNet
 
     public class AsanaObjectCollection : List<IAsanaObject>, IAsanaObjectCollection
     {
+    }
+
+    static public class AsanaObjectExtensions
+    {
+        static public void Save(this IAsanaObject obj, Asana host)
+        {
+            host.Save(obj);
+        }
     }
 }

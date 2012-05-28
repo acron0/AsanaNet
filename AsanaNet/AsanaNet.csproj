@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Asana.cs" />
+    <Compile Include="AsanaAttributes.cs" />
     <Compile Include="AsanaFunction.cs" />
     <Compile Include="Objects\AsanaObject.cs" />
     <Compile Include="AsanaRequest.cs" />

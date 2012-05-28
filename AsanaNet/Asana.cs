@@ -147,7 +147,7 @@ namespace AsanaNet
             foreach (var j in k)
             {
                 var t = new T();
-                t.Parse(j);
+                Utils.Deserialize(j, t);
                 collection.Add(t);
             }
 
@@ -162,8 +162,19 @@ namespace AsanaNet
         internal void PackAndSendResponse<T>(string rawData, AsanaResponseEventHandler callback) where T : IAsanaObject, new()
         {
             var u = new T();
-            u.Parse(GetDataAsDict(rawData));
+            Utils.Deserialize(GetDataAsDict(rawData), u);
             callback(u);
+        }
+
+        /// <summary>
+        /// Tells the asana object to save the specified object
+        /// </summary>
+        /// <param name="obj"></param>
+        internal void Save(IAsanaObject obj)
+        {
+            Dictionary<string, object> dict = Utils.Serialize(obj);
+
+            // TODO
         }
 
         #endregion

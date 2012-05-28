@@ -7,25 +7,29 @@ namespace AsanaNet
 {
     public class AsanaStory : IAsanaObject
     {
+        [AsanaDataAttribute("id")]
         public Int64 ID { get; private set; }
+
+        [AsanaDataAttribute("type")]
         public string Type { get; private set; }
+
+        [AsanaDataAttribute("text")]
         public string Text { get; private set; }
+
+        [AsanaDataAttribute("created_by")]
         public AsanaUser CreatedBy { get; private set; }
+
+        [AsanaDataAttribute("created_at")]
         public DateTime CreatedAt { get; private set; }
+
+        [AsanaDataAttribute("source")]
         public string Source { get; private set; }
+
+        [AsanaDataAttribute("target")]
         public AsanaTask Target { get; private set; }
 
-        public bool Intact { get { return Target != null; } }
+        // ------------------------------------------------------
 
-        public void Parse(Dictionary<string, object> data)
-        {
-            ID = Utils.SafeAssign<Int64>(data, "id");
-            Type = Utils.SafeAssignString(data, "type");
-            Text = Utils.SafeAssignString(data, "text");
-            CreatedBy = Utils.SafeAssign<AsanaUser>(data, "created_by");
-            CreatedAt = Utils.SafeAssign<DateTime>(data, "created_at");
-            Source = Utils.SafeAssignString(data, "source");
-            Target = Utils.SafeAssign<AsanaTask>(data, "target");
-        }
+        public bool Intact { get { return Target != null; } }
     }
 }
