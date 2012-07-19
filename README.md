@@ -11,7 +11,7 @@ To use AsanaNet, start by creating an instance of the Asana service. You can fin
 All 'Get' requests are asynchronous and so must be accompanied by a callback.
 For example, to get the current user's information:
 <code>
-    asana.GetUser(o =>
+    asana.GetMe(o =>
     {
             var user = o as AsanaUser;
             Console.WriteLine("Hello, " + u.Name);
@@ -30,4 +30,15 @@ asana.GetWorkspaces(o =>
     });
 </code>
 
-###Currently, only GET requests are implemented. More soon!
+To create a new task:
+
+<code>
+AsanaTask newTask1 = new AsanaTask(workspace);
+newTask1.Name = "Pick up the milk!";
+newTask1.Notes = "Proper semi-skimmed milk. None of that UHT rubbish.";
+newTask1.Assignee = me;
+newTask1.DueOn = DateTime.Now.AddHours(2);
+newTask1.Save(asana);
+</code>
+
+###Work is on-going! Please contribute!
