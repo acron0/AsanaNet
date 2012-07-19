@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- 
+Name  : AsanaFunctionDefinitions.xml
+Descr : The master encounter list for ND: Prologue
+API   : 1.0
+Auth  : Antony Woods
+Copyright 2012 Antony WOods
+-->
+<AsanaFunctions api="1.0">
+
+  <!--
+    These are the functions that will be called by the application.
+    The formatting is used in the following way: {[Index of paramater|int]:[Name of property on paramter object|string]}
+    (If no name is specified, the ToString of the parameter will be used.)
+  -->
+  <!-- GET Functions -->
+  <Function method="GET" name="GetUsers"                formation="/users"                                    parameters=""                             return="AsanaUser"          collection="true"   />
+  <Function method="GET" name="GetMe"                   formation="/users/me"                                 parameters=""                             return="AsanaUser"          collection="false"  />
+  <Function method="GET" name="GetUserById"             formation="/users/{0}"                                parameters="Int64"                        return="AsanaUser"          collection="false"  />
+  <Function method="GET" name="GetWorkspaces"           formation="/workspaces"                               parameters=""                             return="AsanaWorkspace"     collection="true"   />
+  <Function method="GET" name="GetUsersInWorkspace"     formation="/workspaces/{0:ID}/users"                  parameters="AsanaWorkspace"               return="AsanaUser"          collection="true"   />
+  <Function method="GET" name="GetTasksInWorkspace"     formation="/workspaces/{0:ID}/tasks?assignee={1:ID}"  parameters="AsanaWorkspace, AsanaUser"    return="AsanaTask"          collection="true"   />
+  <Function method="GET" name="GetProjectsInWorkspace"  formation="/workspaces/{0:ID}/projects"               parameters="AsanaWorkspace"               return="AsanaProject"       collection="true"   />
+  <Function method="GET" name="GetTagsInWorkspace"      formation="/workspaces/{0:ID}/tags"                   parameters="AsanaWorkspace"               return="AsanaTag"           collection="true"   />
+  <Function method="GET" name="GetTaskById"             formation="/tasks/{0}"                                parameters="Int64"                        return="AsanaTask"          collection="false"  />
+  <Function method="GET" name="GetStoriesInTask"        formation="/tasks/{0:ID}/stories"                     parameters="AsanaTask"                    return="AsanaStory"         collection="true"   />
+  <Function method="GET" name="GetProjectsOnATask"      formation="/tasks/{0:ID}/projects"                    parameters="AsanaTask"                    return="AsanaProject"       collection="true"   />
+  <Function method="GET" name="GetTasksByTag"           formation="/tags/{0:ID}/tasks"                        parameters="AsanaTask"                    return="AsanaTask"          collection="true"   />
+  <Function method="GET" name="GetStoryById"            formation="/stories/{0}"                              parameters="Int64"                        return="AsanaStory"         collection="false"  />
+  <Function method="GET" name="GetProjectById"          formation="/projects/{0}"                             parameters="Int64"                        return="AsanaProject"       collection="false"  />
+  <Function method="GET" name="GetTasksInAProject"      formation="/projects/{0:ID}/tasks"                    parameters="AsanaProject"                 return="AsanaTask"          collection="true"   />
+  <Function method="GET" name="GetTagById"              formation="/tags/{0}"                                 parameters="Int64"                        return="AsanaTag"           collection="false"  />
+
+  <!-- POST Functions -->                                                                                                                          
+  <Function method="POST" name="CreateWorkspaceTask"    formation="/tasks"                                    parameters=""                                                                             />
+  <Function method="POST" name="AddProjectToTask"       formation="/tasks/{0:ID}/addProject"                  parameters="AsanaTask"                                                                    />
+  <Function method="POST" name="RemoveProjectFromTask"  formation="/tasks/{0:ID}/removeProject"               parameters="AsanaTask"                                                                    />
+  <Function method="POST" name="AddStoryToTask"         formation="/tasks/{0:Target}/stories"                 parameters="AsanaTask"                                                                    />
+
+  <!-- PUT Functions -->                                                                                                                              
+  <Function method="PUT" name="UpdateTask"              formation="/tasks/{0:ID}"                             parameters="AsanaTask"                                                                    />
+  <Function method="PUT" name="UpdateTag"               formation="/tags/{0:ID}"                              parameters="AsanaTag"                                                                     />
+
+
+  <!--
+    Associations define what is essentially a novelty feature within the application.
+    At certain points, it will attempt to 'create' an object if one doesnt exist on the database.
+    Alternatively, it will be updating an existing object.
+  -->
+  <Association type="AsanaTask"   create="CreateWorkspaceTask"  update="UpdateTask" />
+  <Association type="AsanaStory"  create="AddStoryToTask"       update="" />
+
+</AsanaFunctions>

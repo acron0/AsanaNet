@@ -5,31 +5,50 @@ using System.Text;
 
 namespace AsanaNet
 {
-    public class AsanaStory : IAsanaObject
+    public class AsanaStory : AsanaObject, IAsanaData
     {
-        [AsanaDataAttribute("id")]
-        public Int64 ID { get; private set; }
+        [AsanaDataAttribute     ("type",        SerializationFlags.Omit)]
+        public string           Type            { get; private set; }
 
-        [AsanaDataAttribute("type")]
-        public string Type { get; private set; }
+        [AsanaDataAttribute     ("text",        SerializationFlags.Required)]
+        public string           Text            { get; set; }
 
-        [AsanaDataAttribute("text")]
-        public string Text { get; private set; }
+        [AsanaDataAttribute     ("created_by",  SerializationFlags.Omit)]
+        public AsanaUser        CreatedBy       { get; private set; }
 
-        [AsanaDataAttribute("created_by")]
-        public AsanaUser CreatedBy { get; private set; }
+        [AsanaDataAttribute     ("created_at",  SerializationFlags.Omit)]
+        public AsanaDateTime    CreatedAt       { get; private set; }
 
-        [AsanaDataAttribute("created_at")]
-        public DateTime CreatedAt { get; private set; }
+        [AsanaDataAttribute     ("source",      SerializationFlags.Omit)]
+        public string           Source          { get; private set; }
 
-        [AsanaDataAttribute("source")]
-        public string Source { get; private set; }
-
-        [AsanaDataAttribute("target")]
-        public AsanaTask Target { get; private set; }
+        [AsanaDataAttribute     ("target",      SerializationFlags.Omit)]
+        public AsanaTask        Target          { get; private set; }
 
         // ------------------------------------------------------
 
-        public bool Intact { get { return Target != null; } }
+        public bool IsObjectLocal { get { return ID == 0; } }
+
+        public void Complete()
+        {
+            throw new NotImplementedException();
+        }
+
+        //
+        internal AsanaStory()
+        {
+        }
+
+        //
+        public AsanaStory(AsanaTask task) : this("", task)
+        {
+        }
+
+        //
+        public AsanaStory(string text, AsanaTask task)
+        {
+            Text    = text;
+            Target  = task;
+        }
     }
 }

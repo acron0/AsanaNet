@@ -5,16 +5,18 @@ using System.Text;
 
 namespace AsanaNet
 {
-    public class AsanaWorkspace : IAsanaObject
+    public class AsanaWorkspace : AsanaObject, IAsanaData
     {
         [AsanaDataAttribute("name")]
         public string Name  { get; private set; }
 
-        [AsanaDataAttribute("id")]
-        public Int64  ID    { get; private set; }
-
         // ------------------------------------------------------
 
-        public bool Intact { get { return true; } }
+        public bool IsObjectLocal { get { return true; } }
+
+        public void Complete()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

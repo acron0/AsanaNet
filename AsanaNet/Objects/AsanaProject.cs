@@ -5,19 +5,16 @@ using System.Text;
 
 namespace AsanaNet
 {
-    public class AsanaProject : IAsanaObject
+    public class AsanaProject : AsanaObject, IAsanaData
     {
         [AsanaDataAttribute("name")]
         public string Name { get; private set; }
 
-        [AsanaDataAttribute("id")]
-        public Int64 ID { get; private set; }
-
         [AsanaDataAttribute("created_at")]
-        public DateTime CreatedAt { get; private set; }
+        public AsanaDateTime CreatedAt { get; private set; }
 
         [AsanaDataAttribute("modified_at")]
-        public DateTime ModifiedAt { get; private set; }
+        public AsanaDateTime ModifiedAt { get; private set; }
 
         [AsanaDataAttribute("notes")]
         public string Notes { get; private set; }
@@ -33,7 +30,11 @@ namespace AsanaNet
 
         // ------------------------------------------------------
 
-        public bool Intact { get { return true; } }
+        public bool IsObjectLocal { get { return true; } }
 
+        public void Complete()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace AsanaNet
 {
-    public class AsanaUser : IAsanaObject
+    public class AsanaUser : AsanaObject, IAsanaData
     {
         [AsanaDataAttribute("name")]
         public string           Name            { get; private set; }
@@ -13,14 +13,16 @@ namespace AsanaNet
         [AsanaDataAttribute("email")]
         public string           Email           { get; private set; }
 
-        [AsanaDataAttribute("id")]
-        public Int64            ID              { get; private set; }
-
         [AsanaDataAttribute("workspaces")]
         public AsanaWorkspace[] Workspaces      { get; private set; }
 
         // ------------------------------------------------------
 
-        public bool Intact { get { return Workspaces != null; } }
+        public bool IsObjectLocal { get { return ID == 0; } }
+
+        public void Complete()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

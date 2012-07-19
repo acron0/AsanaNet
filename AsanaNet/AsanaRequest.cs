@@ -25,7 +25,7 @@ namespace AsanaNet
         /// <summary>
         /// The error callback
         /// </summary>
-        private Action<string, string> _error;
+        private Action<string, string, string> _error;
 
         /// <summary>
         /// Constructor
@@ -39,12 +39,21 @@ namespace AsanaNet
         /// <summary>
         /// Begins the request
         /// </summary>
-        public void Go(Action<string, WebHeaderCollection> callback, Action<string, string> error)
+        public void Go(Action<string, WebHeaderCollection> callback, Action<string, string, string> error)
         {
             _callback = callback;
             _error = error;
             IAsyncResult result = _request.BeginGetResponse(new AsyncCallback(ResponseCallback), null);
 
+        }
+
+        private string GetResponseContent(WebResponse response)
+        {
+            Encoding enc = Encoding.GetEncoding(1252);
+            var stream = new StreamReader(response.GetResponseStream(), enc);
+            string output = stream.ReadToEnd();
+            stream.Close();
+            return output;
         }
 
         /// <summary>
@@ -63,15 +72,13 @@ namespace AsanaNet
             }
             catch (System.Net.WebException ex)
             {
-                _error(ex.Response.ResponseUri.AbsoluteUri, ex.Message);
+                string responseContent = GetResponseContent(ex.Response);
+                _error(ex.Response.ResponseUri.AbsoluteUri, ex.Message, responseContent);
                 return;
             }            
 
-            Encoding enc = Encoding.GetEncoding(1252);
-            var stream = new StreamReader(response.GetResponseStream(), enc);
-            string output = stream.ReadToEnd();
+            string output = GetResponseContent(response);
 
-            stream.Close();
             response.Close();
 
             _callback(output, response.Headers);

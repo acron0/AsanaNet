@@ -1,0 +1,104 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ assembly name="System.Xml" #>
+<#
+ System.Xml.XmlDocument configurationData = new System.Xml.XmlDocument();
+ configurationData.Load("AsanaNet/T4/AsanaFunctionDefinitions.xml");
+ System.Xml.XmlNodeList functionList = configurationData.GetElementsByTagName("Function");
+ System.Xml.XmlNodeList associationList = configurationData.GetElementsByTagName("Association");
+#>
+using System;
+/*
+* THIS FILE IS GENERATED! DO NOT EDIT!
+* REFER TO AsanaFunctionDefinitions.xml
+*/
+namespace AsanaNet
+{
+		// Enums for all functions
+		public enum Function
+		{
+		<#
+			foreach (System.Xml.XmlNode function in functionList)
+			{		
+		#>
+	<#=function.Attributes["name"].Value#>,
+		<#
+			} 
+		#>
+}
+
+		// Function definitions specifically for the GET functions.
+		public partial class Asana
+		{   
+	<#
+		foreach (System.Xml.XmlNode function in functionList)
+		{
+			if(function.Attributes["method"].Value != "GET")
+				continue;
+
+			string[] parameters = function.Attributes["parameters"].Value.Split(',');
+			string parameterStringWithType = "";
+			string parameterStringNoType = "";
+			for(int i = 0; i < parameters.Length; ++i)
+			{
+				if(!string.IsNullOrWhiteSpace(parameters[i]))
+				{
+					parameterStringWithType += parameters[i] + " arg" + (i+1) + ", ";
+					parameterStringNoType += ", arg" + (i+1);
+				}
+			}
+
+			bool isCollection = false;
+			bool.TryParse(function.Attributes["collection"].Value, out isCollection);
+			string packMethodString = isCollection ? "PackAndSendResponseCollection" : "PackAndSendResponse";
+			string responseTypeString = isCollection ? "AsanaCollectionResponseEventHandler" : "AsanaResponseEventHandler";
+		
+	#>
+		public void <#= function.Attributes["name"].Value #>(<#= parameterStringWithType #><#=responseTypeString#> callback)
+			{
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.<#= function.Attributes["name"].Value #>)<#=parameterStringNoType#>);
+				request.Go((o, h) => <#=packMethodString#><<#= function.Attributes["return"].Value #>>(o, callback), ErrorCallback);
+			}
+	<#
+		} 
+	#>
+	}
+
+		// Binds the enums, formations and methods
+		public partial class AsanaFunction
+		{
+			static internal void InitFunctions()
+			{
+		<#
+			foreach (System.Xml.XmlNode function in functionList)
+			{		
+		#>
+		Functions.Add(Function.<#=function.Attributes["name"].Value#>, new AsanaFunction("<#=function.Attributes["formation"].Value#>", "<#=function.Attributes["method"].Value#>"));
+		<#
+			} 
+		#>
+
+
+		<#
+			foreach (System.Xml.XmlNode association in associationList)
+			{		
+				string create = association.Attributes["create"].Value;
+				string update = association.Attributes["update"].Value;
+				if(!string.IsNullOrWhiteSpace(create))
+					create = string.Format("GetFunction(Function.{0})", create);
+				else
+					create = "null";
+
+				if(!string.IsNullOrWhiteSpace(update))
+					update = string.Format("GetFunction(Function.{0}))", update);
+				else
+					update = "null)";
+		#>
+		Associations.Add(typeof(<#=association.Attributes["type"].Value#>), new AsanaFunctionAssociation(<#=create#>, <#=update#>);
+		<#
+			} 
+		#>
+
+			}
+		}
+}
