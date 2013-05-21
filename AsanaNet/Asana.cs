@@ -15,6 +15,12 @@ namespace AsanaNet
     public delegate void AsanaResponseEventHandler(AsanaObject response);
     public delegate void AsanaCollectionResponseEventHandler(IAsanaObjectCollection response);
 
+	public enum AuthenticationType
+	{
+		Basic,
+		OAuth
+	}
+
     public partial class Asana
     {        
         #region Variables
@@ -34,6 +40,11 @@ namespace AsanaNet
 
         #region Properties
 
+		/// <summary>
+		/// The Authentication Type used for API access
+		/// </summary>
+		public AuthenticationType AuthType { get; private set; }
+
         /// <summary>
         /// The API Key assigned object
         /// </summary>
@@ -44,6 +55,11 @@ namespace AsanaNet
         /// </summary>
         public string EncodedAPIKey { get; private set; }
 
+		/// <summary>
+		/// The OAuth Bearer Token assigned object
+		/// </summary>
+		public string OAuthToken { get; private set; }
+
         #endregion        
 
         #region Methods
@@ -51,14 +67,19 @@ namespace AsanaNet
         /// <summary>
         /// Creates a new Asana entry point.
         /// </summary>
-        /// <param name="apiKey">The API key for the account we intend to access</param>
-        public Asana(string apiKey, Action<string, string, string> errorCallback)
+		/// <param name="apiKeyOrBearerToken">The API key (for Basic authentication) or Bearer Token (for OAuth authentication) for the account we intend to access</param>
+		public Asana(string apiKeyOrBearerToken, AuthenticationType authType, Action<string, string, string> errorCallback)
         {   
             _baseUrl = "https://app.asana.com/api/1.0";
             _errorCallback = errorCallback;
 
-            APIKey = apiKey;
-            EncodedAPIKey = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(apiKey + ":"));
+			AuthType = authType;
+			if (AuthType == AuthenticationType.OAuth) {
+				OAuthToken = apiKeyOrBearerToken;
+			} else {
+				APIKey = apiKeyOrBearerToken;
+				EncodedAPIKey = Convert.ToBase64String (System.Text.Encoding.ASCII.GetBytes(apiKeyOrBearerToken + ":"));
+			}
 
             AsanaFunction.InitFunctions();
         }
@@ -73,7 +94,10 @@ namespace AsanaNet
             string url = _baseUrl + string.Format(new PropertyFormatProvider(), function.Url, obj);
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.Headers["Authorization"] = "Basic " + EncodedAPIKey;
+			if(AuthType == AuthenticationType.Basic)
+				request.Headers["Authorization"] = "Basic " + EncodedAPIKey;
+			else if(AuthType == AuthenticationType.OAuth)
+				request.Headers["Authorization"] = "Bearer " + OAuthToken;
             request.Method = function.Method;
             return new AsanaRequest(request);
         }
@@ -96,7 +120,10 @@ namespace AsanaNet
             }
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.Headers["Authorization"] = "Basic " + EncodedAPIKey;
+			if(AuthType == AuthenticationType.Basic)
+				request.Headers["Authorization"] = "Basic " + EncodedAPIKey;
+			else if(AuthType == AuthenticationType.OAuth)
+				request.Headers["Authorization"] = "Bearer " + OAuthToken;
             request.Method = function.Method;
             request.ContentType = "application/x-www-form-urlencoded";
             request.ContentLength = 0;
