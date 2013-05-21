@@ -14,7 +14,7 @@ For example, to get the current user's information:
     asana.GetMe(o =>
     {
             var user = o as AsanaUser;
-            Console.WriteLine("Hello, " + u.Name);
+            Console.WriteLine("Hello, " + user.Name);
     });
 
 To get a list of workspaces the current user has access to:
