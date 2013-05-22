@@ -58,7 +58,7 @@ namespace AsanaNet
 		/// <summary>
 		/// The OAuth Bearer Token assigned object
 		/// </summary>
-		public string OAuthToken { get; private set; }
+		public string OAuthToken { get; set; }
 
         #endregion        
 
