@@ -142,7 +142,7 @@ namespace AsanaNet
                     if(!data.ContainsKey(ca.Name))
                         continue;
 
-                    if (p.PropertyType.GUID == typeof(string).GUID)
+                    if (p.PropertyType == typeof(string))
                     {
                         p.SetValue(obj, SafeAssignString(data, ca.Name), null);
                     }
