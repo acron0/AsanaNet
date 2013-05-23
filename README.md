@@ -2,6 +2,8 @@
 A .NET implementation of the Asana REST API
 http://developer.asana.com/
 
+This open-source project uses the MIT license.
+
 ##Using AsanaNet
 To use AsanaNet, start by creating an instance of the Asana service. You can find your API key [here](http://app.asana.com/-/account_api).
 
