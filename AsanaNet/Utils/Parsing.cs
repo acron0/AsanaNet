@@ -245,12 +245,12 @@ namespace AsanaNet
             {
                 present = false;
             }
-            else if (value.GetType().GUID == typeof(string).GUID)
+            else if (value.GetType() == typeof(string))
             {
                 if (string.IsNullOrWhiteSpace(value as string))
                     present = false;
             }
-            else if (value.GetType().GUID == typeof(DateTime).GUID)
+            else if (value.GetType() == typeof(DateTime))
             {
                 if((DateTime)value == new DateTime())
                     present = false;
