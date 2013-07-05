@@ -34,21 +34,53 @@ namespace AsanaNet
 
         public static bool operator ==(AsanaDateTime a, DateTime b)
         {
+            if (object.ReferenceEquals(a, null))
+            {
+                return object.ReferenceEquals(b, null);
+            }
+            if (object.ReferenceEquals(b, null))
+            {
+                return object.ReferenceEquals(a, null);
+            }
             return a.DateTime == b;
         }
 
         public static bool operator ==(AsanaDateTime a, AsanaDateTime b)
         {
+            if (object.ReferenceEquals(a, null))
+            {
+                return object.ReferenceEquals(b, null);
+            }
+            if (object.ReferenceEquals(b, null))
+            {
+                return object.ReferenceEquals(a, null);
+            }
             return a.DateTime == b.DateTime;
         }
 
         public static bool operator !=(AsanaDateTime a, DateTime b)
         {
+            if (object.ReferenceEquals(a, null))
+            {
+                return !object.ReferenceEquals(b, null);
+            }
+            if (object.ReferenceEquals(b, null))
+            {
+                return !object.ReferenceEquals(a, null);
+            }
             return a.DateTime != b;
         }
 
         public static bool operator !=(AsanaDateTime a, AsanaDateTime b)
         {
+            if (object.ReferenceEquals(a, null))
+            {
+                return !object.ReferenceEquals(b, null);
+            }
+            if (object.ReferenceEquals(b, null))
+            {
+                return !object.ReferenceEquals(a, null);
+            }
             return a.DateTime != b.DateTime;
         }
 
