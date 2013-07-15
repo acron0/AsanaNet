@@ -30,6 +30,7 @@ Copyright 2012 Antony WOods
   <Function method="GET" name="GetProjectById"          formation="/projects/{0}"                             parameters="Int64"                        return="AsanaProject"       collection="false"  />
   <Function method="GET" name="GetTasksInAProject"      formation="/projects/{0:ID}/tasks"                    parameters="AsanaProject"                 return="AsanaTask"          collection="true"   />
   <Function method="GET" name="GetTagById"              formation="/tags/{0}"                                 parameters="Int64"                        return="AsanaTag"           collection="false"  />
+  <Function method="GET" name="GetTeamsInWorkspace"     formation="/organizations/{0:ID}/teams"                  parameters="Int64"                        return="AsanaTeam"          collection="true"   />
 
   <!-- POST Functions -->                                                                                                                          
   <Function method="POST" name="CreateWorkspaceTask"    formation="/tasks"                                    parameters=""                                                                             />

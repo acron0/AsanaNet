@@ -53,6 +53,7 @@
     <Compile Include="Objects\AsanaUser.cs" />
     <Compile Include="Objects\AsanaWorkspace.cs" />
     <Compile Include="MiniJSON.cs" />
+    <Compile Include="Objects\AsanaTeam.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="T4\AsanaFunctions.cs">
       <AutoGen>True</AutoGen>
