@@ -28,6 +28,9 @@ namespace AsanaNet
         [AsanaDataAttribute("followers")]
         public AsanaUser[] Followers { get; private set; }
 
+        [AsanaDataAttribute("team")]
+        public AsanaTeam Team { get; private set; }
+
         // ------------------------------------------------------
 
         public bool IsObjectLocal { get { return true; } }
