@@ -8,7 +8,7 @@ This open-source project uses the MIT license.
 To use AsanaNet, start by creating an instance of the Asana service. You can find your API key [here](http://app.asana.com/-/account_api).
 
 
-     var asana = new Asana(YOUR_API_KEY, errorCallback);
+     var asana = new Asana(YOUR_API_KEY, AuthenticationType.Basic, errorCallback);
 
 All 'Get' requests are asynchronous and so must be accompanied by a callback.
 For example, to get the current user's information:
