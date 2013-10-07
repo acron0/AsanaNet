@@ -49,7 +49,7 @@ namespace AsanaNet
 
         private string GetResponseContent(WebResponse response)
         {
-            Encoding enc = Encoding.GetEncoding(1252);
+            Encoding enc = Encoding.GetEncoding(65001);
             var stream = new StreamReader(response.GetResponseStream(), enc);
             string output = stream.ReadToEnd();
             stream.Close();
