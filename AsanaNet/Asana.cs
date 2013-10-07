@@ -182,7 +182,6 @@ namespace AsanaNet
                 Parsing.Deserialize(j, t, this);
                 collection.Add(t);
             }
-
             callback(collection);
         }
 
@@ -231,7 +230,7 @@ namespace AsanaNet
                 func = idata.IsObjectLocal ? afa.Create : afa.Update;
 
             request = GetBaseRequestWithParams(func, data, obj);
-            request.Go((o, h) => RepackAndCallback(o, obj), ErrorCallback);            
+            request.Go((o, h) => RepackAndCallback(o, obj), ErrorCallback);
         }
 
         #endregion
