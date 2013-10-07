@@ -92,7 +92,7 @@ namespace AsanaNet
 				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetProjectsOnATask), arg1);
 				return request.Go((o, h) => PackAndSendResponseCollection<AsanaProject>(o, callback), ErrorCallback);
 			}
-			public Task GetTasksByTag(AsanaTask arg1, AsanaCollectionResponseEventHandler callback)
+			public Task GetTasksByTag(AsanaTag arg1, AsanaCollectionResponseEventHandler callback)
 			{
 				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTasksByTag), arg1);
 				return request.Go((o, h) => PackAndSendResponseCollection<AsanaTask>(o, callback), ErrorCallback);
