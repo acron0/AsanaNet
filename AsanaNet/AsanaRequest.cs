@@ -6,6 +6,7 @@ using System.Net;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace AsanaNet
 {
@@ -29,6 +30,10 @@ namespace AsanaNet
         /// </summary>
         private Action<string, string, string> _error;
 
+        private static int requestsCount = 0;
+        private static int maxReqPerMinute = 100;
+        private static Stopwatch throttlingTimer;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -38,44 +43,60 @@ namespace AsanaNet
             _request = request;
         }
 
+        public static bool ThrottlingCheck()
+        {
+            requestsCount++;
+            if (throttlingTimer == null || !throttlingTimer.IsRunning)
+                throttlingTimer = Stopwatch.StartNew();
+            else if (requestsCount >= maxReqPerMinute && (throttlingTimer.ElapsedTicks / Stopwatch.Frequency) < 60)
+            {
+                throttlingTimer = Stopwatch.StartNew();
+                return false;
+            }
+            return true;
+        }
+
         /// <summary>
         /// Begins the request
         /// </summary>
-        public Task Go(Action<string, WebHeaderCollection> callback, Action<string, string, string> error)
+        public async Task<Task> Go(Action<string, WebHeaderCollection> callback, Action<string, string, string> error, int ThrottleSeconds = 0)
         {
             _callback = callback;
             _error = error;
-            Task<Task<WebResponse>> requestTask;
 
-            try
+            if (!ThrottlingCheck())
             {
-                requestTask = new Task<Task<WebResponse>>(async () =>
-                {
-                    return await Task.Factory.FromAsync<WebResponse>(
-                                    _request.BeginGetResponse,
-                                    _request.EndGetResponse,
-                                    null);
-                });
-                requestTask.Start();
+                // Throttling for a minute before completing the task.
+                await Task.Delay(1000 * 60);
             }
-            catch (System.Net.WebException ex)
+            if (ThrottleSeconds > 0)
             {
-                string responseContent = GetResponseContent(ex.Response);
-                _error(ex.Response.ResponseUri.AbsoluteUri, ex.Message, responseContent);
-                return new Task(() => { });
+                await Task.Delay(1000 * ThrottleSeconds);
             }
 
-            HttpWebRequest request = (HttpWebRequest)_request;
-            AsanaRequest state = (AsanaRequest)requestTask.AsyncState;
-            WebResponse result;
-            return Task.Run( async () =>
-            {
-                requestTask.Wait();
-                // unwrap waits for the result
-                result = await requestTask.Unwrap();
-                string output = GetResponseContent(result);
-                _callback(output, result.Headers);
-            });
+            return await Task.Factory.FromAsync<WebResponse>(
+                    _request.BeginGetResponse,
+                    _request.EndGetResponse,
+                    null).ContinueWith(async (requestTask) =>
+                    {
+                        HttpWebRequest request = (HttpWebRequest)_request;
+                        AsanaRequest state = (AsanaRequest)requestTask.AsyncState;
+                        WebResponse result = requestTask.Result;
+                        if (result.Headers["Retry-After"] != null)
+                        {
+                            string retryAfter = result.Headers["Retry-After"];
+                            await Go(callback, error, Convert.ToInt32(retryAfter));
+                            return;
+                        }
+                        string responseContent = GetResponseContent(result);
+                        if (requestTask.IsFaulted)
+                        {
+                            _error(result.ResponseUri.AbsoluteUri, requestTask.Exception.InnerException.Message, responseContent);
+                            return;
+                        }
+                        _callback(responseContent, result.Headers);
+                    }
+            );
         }
 
         private string GetResponseContent(WebResponse response)
