@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace AsanaNet
 {
@@ -39,12 +41,41 @@ namespace AsanaNet
         /// <summary>
         /// Begins the request
         /// </summary>
-        public void Go(Action<string, WebHeaderCollection> callback, Action<string, string, string> error)
+        public Task Go(Action<string, WebHeaderCollection> callback, Action<string, string, string> error)
         {
             _callback = callback;
             _error = error;
-            IAsyncResult result = _request.BeginGetResponse(new AsyncCallback(ResponseCallback), null);
+            Task<Task<WebResponse>> requestTask;
 
+            try
+            {
+                requestTask = new Task<Task<WebResponse>>(async () =>
+                {
+                    return await Task.Factory.FromAsync<WebResponse>(
+                                    _request.BeginGetResponse,
+                                    _request.EndGetResponse,
+                                    null);
+                });
+                requestTask.Start();
+            }
+            catch (System.Net.WebException ex)
+            {
+                string responseContent = GetResponseContent(ex.Response);
+                _error(ex.Response.ResponseUri.AbsoluteUri, ex.Message, responseContent);
+                return new Task(() => { });
+            }
+
+            HttpWebRequest request = (HttpWebRequest)_request;
+            AsanaRequest state = (AsanaRequest)requestTask.AsyncState;
+            WebResponse result;
+            return Task.Run( async () =>
+            {
+                requestTask.Wait();
+                // unwrap waits for the result
+                result = await requestTask.Unwrap();
+                string output = GetResponseContent(result);
+                _callback(output, result.Headers);
+            });
         }
 
         private string GetResponseContent(WebResponse response)
@@ -54,34 +85,6 @@ namespace AsanaNet
             string output = stream.ReadToEnd();
             stream.Close();
             return output;
-        }
-
-        /// <summary>
-        /// Callback for the end of the async operation.
-        /// </summary>
-        /// <param name="result"></param>
-        private void ResponseCallback(IAsyncResult result)
-        {
-            AsanaRequest state = (AsanaRequest)result.AsyncState;
-            HttpWebRequest request = (HttpWebRequest)_request;
-
-            HttpWebResponse response = null;
-            try
-            {
-                response = (HttpWebResponse)request.EndGetResponse(result);
-            }
-            catch (System.Net.WebException ex)
-            {
-                string responseContent = GetResponseContent(ex.Response);
-                _error(ex.Response.ResponseUri.AbsoluteUri, ex.Message, responseContent);
-                return;
-            }            
-
-            string output = GetResponseContent(response);
-
-            response.Close();
-
-            _callback(output, response.Headers);
         }
     }
 }
