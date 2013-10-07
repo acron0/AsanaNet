@@ -20,7 +20,8 @@ For example, to get the current user's information:
     });
 
 
-It is also possible to make them synchronize, by adding ```.Wait();````.
+It is also possible to make them synchronize, by adding ```.Wait();```.
+
 Additionally, since the methods always return a task, you can ```await``` them within an ```async``` method, or another task.
 
     asana.GetMe(o =>
