@@ -7,6 +7,7 @@ using System.Web;
 using System.Threading;
 using System.IO;
 using System.Xml;
+using System.Threading.Tasks;
 
 using MiniJSON;
 
@@ -215,7 +216,7 @@ namespace AsanaNet
         /// Tells the asana object to save the specified object
         /// </summary>
         /// <param name="obj"></param>
-        internal void Save<T>(T obj, AsanaFunction func, Dictionary<string, object> data = null) where T: AsanaObject
+        internal Task Save<T>(T obj, AsanaFunction func, Dictionary<string, object> data = null) where T: AsanaObject
         {
             IAsanaData idata = obj as IAsanaData;
             if (idata == null)
@@ -230,7 +231,7 @@ namespace AsanaNet
                 func = idata.IsObjectLocal ? afa.Create : afa.Update;
 
             request = GetBaseRequestWithParams(func, data, obj);
-            request.Go((o, h) => RepackAndCallback(o, obj), ErrorCallback);
+            return request.Go((o, h) => RepackAndCallback(o, obj), ErrorCallback);
         }
 
         #endregion
