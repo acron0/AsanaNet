@@ -19,6 +19,17 @@ For example, to get the current user's information:
             Console.WriteLine("Hello, " + user.Name);
     });
 
+
+It is also possible to make them synchronize, by adding ```.Wait();```.
+
+Additionally, since the methods always return a task, you can ```await``` them within an ```async``` method, or another task.
+
+    asana.GetMe(o =>
+    {
+            var user = o as AsanaUser;
+            Console.WriteLine("Hello, " + user.Name);
+    }).Wait();
+
 To get a list of workspaces the current user has access to:
 
     asana.GetWorkspaces(o =>
@@ -37,5 +48,17 @@ To create a new task:
     newTask1.Assignee = me;
     newTask1.DueOn = DateTime.Now.AddHours(2);
     newTask1.Save(asana);
+
+###Error callback method
+The error callback method may be in the following form:
+
+    static void errorCallback(string s1, string s2, string s3)
+    {
+
+    }
+
+Also, if you don't want handling anything, you can just pass an empty lambda into the constructor:
+
+    _asana = new Asana(_apiKey, AuthenticationType.Basic, (s1, s2, s3) => {});
 
 ###Work is on-going! Please contribute!
