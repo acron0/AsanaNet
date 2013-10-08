@@ -58,8 +58,8 @@ namespace AsanaNet
 
         /// <summary>
         /// Begins the request
-        /// </summary>
-        public async Task<Task> Go(Action<string, WebHeaderCollection> callback, Action<string, string, string> error, int ThrottleSeconds = 0)
+        /// </summary> <Task>
+        public Task Go(Action<string, WebHeaderCollection> callback, Action<string, string, string> error, int ThrottleSeconds = 0)
         {
             _callback = callback;
             _error = error;
@@ -67,17 +67,18 @@ namespace AsanaNet
             if (!ThrottlingCheck())
             {
                 // Throttling for a minute before completing the task.
-                await Task.Delay(1000 * 60);
+                // Console.WriteLine("Throttling");
+                Thread.Sleep(1000 * 10);
             }
             if (ThrottleSeconds > 0)
             {
-                await Task.Delay(1000 * ThrottleSeconds);
+                Task.Delay(1000 * ThrottleSeconds);
             }
 
-            return await Task.Factory.FromAsync<WebResponse>(
+            return Task.Factory.FromAsync<WebResponse>(
                     _request.BeginGetResponse,
                     _request.EndGetResponse,
-                    null).ContinueWith(async (requestTask) =>
+                    null).ContinueWith( (requestTask) =>
                     {
                         HttpWebRequest request = (HttpWebRequest)_request;
                         AsanaRequest state = (AsanaRequest)requestTask.AsyncState;
@@ -85,7 +86,7 @@ namespace AsanaNet
                         if (result.Headers["Retry-After"] != null)
                         {
                             string retryAfter = result.Headers["Retry-After"];
-                            await Go(callback, error, Convert.ToInt32(retryAfter));
+                            Go(callback, error, Convert.ToInt32(retryAfter));
                             return;
                         }
                         string responseContent = GetResponseContent(result);
