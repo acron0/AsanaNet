@@ -30,10 +30,6 @@ namespace AsanaNet
         /// </summary>
         private Action<string, string, string> _error;
 
-        private static int requestsCount = 0;
-        private static int maxReqPerMinute = 100;
-        private static Stopwatch throttlingTimer;
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -41,19 +37,6 @@ namespace AsanaNet
         public AsanaRequest(HttpWebRequest request)
         {
             _request = request;
-        }
-
-        public static bool ThrottlingCheck()
-        {
-            requestsCount++;
-            if (throttlingTimer == null || !throttlingTimer.IsRunning)
-                throttlingTimer = Stopwatch.StartNew();
-            else if (requestsCount >= maxReqPerMinute && (throttlingTimer.ElapsedTicks / Stopwatch.Frequency) < 60)
-            {
-                throttlingTimer = Stopwatch.StartNew();
-                return false;
-            }
-            return true;
         }
 
         /// <summary>
@@ -64,12 +47,6 @@ namespace AsanaNet
             _callback = callback;
             _error = error;
 
-            if (!ThrottlingCheck())
-            {
-                // Throttling for a minute before completing the task.
-                // Console.WriteLine("Throttling");
-                Thread.Sleep(1000 * 10);
-            }
             if (ThrottleSeconds > 0)
             {
                 Task.Delay(1000 * ThrottleSeconds);
