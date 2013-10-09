@@ -44,7 +44,7 @@ namespace AsanaNet
         private static bool _throttling = false;
         private static ManualResetEvent _throttlingWaitHandle = new ManualResetEvent(false); 
 
-        private void ThrottleFor(int seconds)
+        private static void ThrottleFor(int seconds)
         {
             _throttling = true;
             Timer timer = null;
