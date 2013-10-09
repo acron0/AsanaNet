@@ -40,16 +40,35 @@ namespace AsanaNet
         }
 
         /// <summary>
+        /// Static because all Asana requests will have a common throttle
+        /// </summary>
+        private static bool _throttling = false;
+        private static ManualResetEvent _throttlingWaitHandle = new ManualResetEvent(false); 
+
+        private void ThrottleFor(int seconds)
+        {
+            _throttling = true;
+            Timer timer = null;
+            timer = new Timer(s =>
+                {
+                    _throttling = false;
+                    _throttlingWaitHandle.Set();
+                    _throttlingWaitHandle = new ManualResetEvent(false);
+                    timer.Dispose();
+                }, null, 1000 * seconds, Timeout.Infinite);
+        }
+
+        /// <summary>
         /// Begins the request
         /// </summary> <Task>
-        public Task Go(Action<string, WebHeaderCollection> callback, Action<string, string, string> error, int ThrottleSeconds = 0)
+        public Task Go(Action<string, WebHeaderCollection> callback, Action<string, string, string> error)
         {
             _callback = callback;
             _error = error;
 
-            if (ThrottleSeconds > 0)
+            if (_throttling)
             {
-                Task.Delay(1000 * ThrottleSeconds);
+                _throttlingWaitHandle.WaitOne();
             }
 
             return Task.Factory.FromAsync<WebResponse>(
@@ -63,7 +82,8 @@ namespace AsanaNet
                         if (result.Headers["Retry-After"] != null)
                         {
                             string retryAfter = result.Headers["Retry-After"];
-                            Go(callback, error, Convert.ToInt32(retryAfter));
+                            ThrottleFor(Convert.ToInt32(retryAfter));
+                            Go(callback, error);
                             return;
                         }
                         string responseContent = GetResponseContent(result);
