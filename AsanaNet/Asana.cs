@@ -100,6 +100,7 @@ namespace AsanaNet
 			else if(AuthType == AuthenticationType.OAuth)
 				request.Headers["Authorization"] = "Bearer " + OAuthToken;
             request.Method = function.Method;
+            request.UserAgent = "AsanaNet (github.com/acron0/AsanaNet)";
             return new AsanaRequest(request);
         }
 

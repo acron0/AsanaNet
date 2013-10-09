@@ -48,6 +48,9 @@ namespace AsanaNet
         [AsanaDataAttribute     ("projects",        SerializationFlags.Optional, "ID")]
         public AsanaProject[]   Projects            { get; private set; }
 
+        [AsanaDataAttribute     ("tags",            SerializationFlags.Optional, "ID")]
+        public AsanaTag[]       Tags                { get; private set; }
+
         [AsanaDataAttribute     ("workspace",       SerializationFlags.Required, "ID")]
         public AsanaWorkspace   Workspace           { get; private set; }
 

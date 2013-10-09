@@ -25,12 +25,12 @@ Copyright 2012 Antony WOods
   <Function method="GET" name="GetTaskById"             formation="/tasks/{0}"                                parameters="Int64"                        return="AsanaTask"          collection="false"  />
   <Function method="GET" name="GetStoriesInTask"        formation="/tasks/{0:ID}/stories"                     parameters="AsanaTask"                    return="AsanaStory"         collection="true"   />
   <Function method="GET" name="GetProjectsOnATask"      formation="/tasks/{0:ID}/projects"                    parameters="AsanaTask"                    return="AsanaProject"       collection="true"   />
-  <Function method="GET" name="GetTasksByTag"           formation="/tags/{0:ID}/tasks"                        parameters="AsanaTask"                    return="AsanaTask"          collection="true"   />
+  <Function method="GET" name="GetTasksByTag"           formation="/tags/{0:ID}/tasks"                        parameters="AsanaTag"                     return="AsanaTask"          collection="true"   />
   <Function method="GET" name="GetStoryById"            formation="/stories/{0}"                              parameters="Int64"                        return="AsanaStory"         collection="false"  />
   <Function method="GET" name="GetProjectById"          formation="/projects/{0}"                             parameters="Int64"                        return="AsanaProject"       collection="false"  />
   <Function method="GET" name="GetTasksInAProject"      formation="/projects/{0:ID}/tasks"                    parameters="AsanaProject"                 return="AsanaTask"          collection="true"   />
   <Function method="GET" name="GetTagById"              formation="/tags/{0}"                                 parameters="Int64"                        return="AsanaTag"           collection="false"  />
-  <Function method="GET" name="GetTeamsInWorkspace"     formation="/organizations/{0:ID}/teams"                  parameters="Int64"                        return="AsanaTeam"          collection="true"   />
+  <Function method="GET" name="GetTeamsInWorkspace"     formation="/organizations/{0:ID}/teams"               parameters="Int64"                        return="AsanaTeam"          collection="true"   />
 
   <!-- POST Functions -->                                                                                                                          
   <Function method="POST" name="CreateWorkspaceTask"    formation="/tasks"                                    parameters=""                                                                             />
