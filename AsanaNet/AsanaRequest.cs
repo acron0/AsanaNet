@@ -6,6 +6,7 @@ using System.Net;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace AsanaNet
 {
@@ -40,42 +41,40 @@ namespace AsanaNet
 
         /// <summary>
         /// Begins the request
-        /// </summary>
-        public Task Go(Action<string, WebHeaderCollection> callback, Action<string, string, string> error)
+        /// </summary> <Task>
+        public Task Go(Action<string, WebHeaderCollection> callback, Action<string, string, string> error, int ThrottleSeconds = 0)
         {
             _callback = callback;
             _error = error;
-            Task<Task<WebResponse>> requestTask;
 
-            try
+            if (ThrottleSeconds > 0)
             {
-                requestTask = new Task<Task<WebResponse>>(async () =>
-                {
-                    return await Task.Factory.FromAsync<WebResponse>(
-                                    _request.BeginGetResponse,
-                                    _request.EndGetResponse,
-                                    null);
-                });
-                requestTask.Start();
-            }
-            catch (System.Net.WebException ex)
-            {
-                string responseContent = GetResponseContent(ex.Response);
-                _error(ex.Response.ResponseUri.AbsoluteUri, ex.Message, responseContent);
-                return new Task(() => { });
+                Task.Delay(1000 * ThrottleSeconds);
             }
 
-            HttpWebRequest request = (HttpWebRequest)_request;
-            AsanaRequest state = (AsanaRequest)requestTask.AsyncState;
-            WebResponse result;
-            return Task.Run( async () =>
-            {
-                requestTask.Wait();
-                // unwrap waits for the result
-                result = await requestTask.Unwrap();
-                string output = GetResponseContent(result);
-                _callback(output, result.Headers);
-            });
+            return Task.Factory.FromAsync<WebResponse>(
+                    _request.BeginGetResponse,
+                    _request.EndGetResponse,
+                    null).ContinueWith( (requestTask) =>
+                    {
+                        HttpWebRequest request = (HttpWebRequest)_request;
+                        AsanaRequest state = (AsanaRequest)requestTask.AsyncState;
+                        WebResponse result = requestTask.Result;
+                        if (result.Headers["Retry-After"] != null)
+                        {
+                            string retryAfter = result.Headers["Retry-After"];
+                            Go(callback, error, Convert.ToInt32(retryAfter));
+                            return;
+                        }
+                        string responseContent = GetResponseContent(result);
+                        if (requestTask.IsFaulted)
+                        {
+                            _error(result.ResponseUri.AbsoluteUri, requestTask.Exception.InnerException.Message, responseContent);
+                            return;
+                        }
+                        _callback(responseContent, result.Headers);
+                    }
+            );
         }
 
         private string GetResponseContent(WebResponse response)
