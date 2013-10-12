@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace AsanaNet
 {
@@ -73,8 +74,8 @@ namespace AsanaNet
             }
             catch (System.Exception)
             {
-                return null;            	
-            } 
+                return null;
+            }
         }
 
         /// <summary>
@@ -123,6 +124,11 @@ namespace AsanaNet
         {
             return ID.GetHashCode();
         }
+
+        public virtual Task Refresh()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public interface IAsanaObjectCollection : IList<AsanaObject>
@@ -131,6 +137,21 @@ namespace AsanaNet
 
     public class AsanaObjectCollection : List<AsanaObject>, IAsanaObjectCollection
     {
+    }
+
+    static public class IAsanaObjectCollectionExtensions
+    {
+        static public List<Task> RefreshAll<T>(this IAsanaObjectCollection objects) where T : AsanaObject
+        {
+            List<Task> workers = new List<Task>();
+            foreach (T o in objects)
+            {
+                if (o.Host == null)
+                    throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
+                workers.Add(o.Refresh());
+            }
+            return workers;
+        }
     }
 
     static public class AsanaObjectExtensions
