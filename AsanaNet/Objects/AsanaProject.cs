@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using System.Threading.Tasks;
+
 namespace AsanaNet
 {
     public class AsanaProject : AsanaObject, IAsanaData
@@ -38,6 +40,21 @@ namespace AsanaNet
         public void Complete()
         {
             throw new NotImplementedException();
+        }
+
+        public override Task Refresh()
+        {
+            return Host.GetProjectById(ID, project =>
+            {
+                Name = (project as AsanaProject).Name;
+                CreatedAt = (project as AsanaProject).CreatedAt;
+                ModifiedAt = (project as AsanaProject).ModifiedAt;
+                Notes = (project as AsanaProject).Notes;
+                Archived = (project as AsanaProject).Archived;
+                Workspace = (project as AsanaProject).Workspace;
+                Followers = (project as AsanaProject).Followers;
+                Team = (project as AsanaProject).Team;
+            });
         }
     }
 }
