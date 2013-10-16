@@ -39,6 +39,9 @@ namespace AsanaNet
         internal bool IsDirty(string key, object value)
         {
             object lvalue = null;
+            if (_lastSave == null)
+                return false;
+
             if(_lastSave.TryGetValue(key, out lvalue))
             {
                 return !value.Equals(lvalue);
@@ -178,6 +181,13 @@ namespace AsanaNet
             if (obj.Host == null)
                 throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
             obj.Host.Save(obj, null);
+        }
+
+        static public void Save(this AsanaObject obj, Dictionary<string, object> data)
+        {
+            if (obj.Host == null)
+                throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
+            obj.Host.Save(obj, null, data);
         }
     }
 }

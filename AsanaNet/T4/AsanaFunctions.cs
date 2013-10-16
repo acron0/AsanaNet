@@ -18,6 +18,7 @@ namespace AsanaNet
 			GetProjectsInWorkspace,
 			GetTagsInWorkspace,
 			GetTaskById,
+			GetSubTasksByParentId,
 			GetStoriesInTask,
 			GetProjectsOnATask,
 			GetTasksByTag,
@@ -82,6 +83,11 @@ namespace AsanaNet
 				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTaskById), arg1);
 				return request.Go((o, h) => PackAndSendResponse<AsanaTask>(o, callback), ErrorCallback);
 			}
+			public Task GetSubTasksByParentId(Int64 arg1, AsanaCollectionResponseEventHandler callback)
+			{
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetSubTasksByParentId), arg1);
+				return request.Go((o, h) => PackAndSendResponseCollection<AsanaTask>(o, callback), ErrorCallback);
+			}
 			public Task GetStoriesInTask(AsanaTask arg1, AsanaCollectionResponseEventHandler callback)
 			{
 				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetStoriesInTask), arg1);
@@ -138,6 +144,7 @@ namespace AsanaNet
 				Functions.Add(Function.GetProjectsInWorkspace, new AsanaFunction("/workspaces/{0:ID}/projects", "GET"));
 				Functions.Add(Function.GetTagsInWorkspace, new AsanaFunction("/workspaces/{0:ID}/tags", "GET"));
 				Functions.Add(Function.GetTaskById, new AsanaFunction("/tasks/{0}", "GET"));
+				Functions.Add(Function.GetSubTasksByParentId, new AsanaFunction("/tasks/{0}/subtasks", "GET"));
 				Functions.Add(Function.GetStoriesInTask, new AsanaFunction("/tasks/{0:ID}/stories", "GET"));
 				Functions.Add(Function.GetProjectsOnATask, new AsanaFunction("/tasks/{0:ID}/projects", "GET"));
 				Functions.Add(Function.GetTasksByTag, new AsanaFunction("/tags/{0:ID}/tasks", "GET"));

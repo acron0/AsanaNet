@@ -23,6 +23,7 @@ Copyright 2012 Antony WOods
   <Function method="GET" name="GetProjectsInWorkspace"  formation="/workspaces/{0:ID}/projects"               parameters="AsanaWorkspace"               return="AsanaProject"       collection="true"   />
   <Function method="GET" name="GetTagsInWorkspace"      formation="/workspaces/{0:ID}/tags"                   parameters="AsanaWorkspace"               return="AsanaTag"           collection="true"   />
   <Function method="GET" name="GetTaskById"             formation="/tasks/{0}"                                parameters="Int64"                        return="AsanaTask"          collection="false"  />
+  <Function method="GET" name="GetSubTasksByParentId"   formation="/tasks/{0}/subtasks"                       parameters="Int64"                        return="AsanaTask"          collection="true"   />
   <Function method="GET" name="GetStoriesInTask"        formation="/tasks/{0:ID}/stories"                     parameters="AsanaTask"                    return="AsanaStory"         collection="true"   />
   <Function method="GET" name="GetProjectsOnATask"      formation="/tasks/{0:ID}/projects"                    parameters="AsanaTask"                    return="AsanaProject"       collection="true"   />
   <Function method="GET" name="GetTasksByTag"           formation="/tags/{0:ID}/tasks"                        parameters="AsanaTag"                     return="AsanaTask"          collection="true"   />

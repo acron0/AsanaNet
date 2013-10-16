@@ -113,12 +113,25 @@ namespace AsanaNet
         {
             string url = _baseUrl + string.Format(new PropertyFormatProvider(), function.Url, obj);
 
+            byte[] body = null;
+            string contentType = "application/x-www-form-urlencoded";
             if (args.Count > 0)
             {
-                url += "?";
-                foreach (var kv in args)
-                    url += kv.Key.ToString() + "=" + Uri.EscapeUriString(kv.Value.ToString()) + "&";
-                url = url.TrimEnd('&');
+                if (function.Method == "PUT")
+                {
+                    var data = new Dictionary<string, object>();
+                    data["data"] = args;
+                    var json = MiniJSON.Json.Serialize(data);
+                    body = ASCIIEncoding.ASCII.GetBytes(json);
+                    contentType = "application/json";
+                }
+                else
+                {
+                    url += "?";
+                    foreach (var kv in args)
+                        url += kv.Key.ToString() + "=" + Uri.EscapeUriString(kv.Value.ToString()) + "&";
+                    url = url.TrimEnd('&');
+                }
             }
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
@@ -127,8 +140,16 @@ namespace AsanaNet
 			else if(AuthType == AuthenticationType.OAuth)
 				request.Headers["Authorization"] = "Bearer " + OAuthToken;
             request.Method = function.Method;
-            request.ContentType = "application/x-www-form-urlencoded";
-            request.ContentLength = 0;
+            request.ContentType = contentType;
+
+            if (body != null)
+            {
+                request.ContentLength = body.Length;
+                var stream = request.GetRequestStream();
+                stream.Write(body, 0, body.Length);
+            }
+            else
+                request.ContentLength = 0;
 
             return new AsanaRequest(request);
         }
