@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace AsanaNet
 {
@@ -75,7 +76,7 @@ namespace AsanaNet
             Workspace = workspace;
         }
 
-        public void AddProject(AsanaProject proj, Asana host)
+        public Task AddProject(AsanaProject proj, Asana host)
         {
             Dictionary<string, object> project = new Dictionary<string, object>();
             project.Add("project", proj.ID);
@@ -96,17 +97,17 @@ namespace AsanaNet
                 Saving -= savedCallback;
             };
             Saving += savedCallback;
-            host.Save(this, AsanaFunction.GetFunction(Function.AddProjectToTask), project);
+            return host.Save(this, AsanaFunction.GetFunction(Function.AddProjectToTask), project);
         }
 
-        public void AddProject(AsanaProject proj)
+        public Task AddProject(AsanaProject proj)
         {
             if (Host == null)
                 throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
-            AddProject(proj, Host);
+            return AddProject(proj, Host);
         }
 
-        public void RemoveProject(AsanaProject proj, Asana host)
+        public Task RemoveProject(AsanaProject proj, Asana host)
         {
             Dictionary<string, object> project = new Dictionary<string, object>();
             project.Add("project", proj.ID);
@@ -124,14 +125,73 @@ namespace AsanaNet
                 Saving -= savedCallback;
             };
             Saving += savedCallback;
-            host.Save(this, AsanaFunction.GetFunction(Function.RemoveProjectFromTask), project);
+            return host.Save(this, AsanaFunction.GetFunction(Function.RemoveProjectFromTask), project);
         }
 
-        public void RemoveProject(AsanaProject proj)
+        public Task RemoveProject(AsanaProject proj)
         {
             if (Host == null)
                 throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
-            RemoveProject(proj, Host);
+            return RemoveProject(proj, Host);
+        }
+
+        public Task AddTag(AsanaTag proj, Asana host)
+        {
+            Dictionary<string, object> Tag = new Dictionary<string, object>();
+            Tag.Add("Tag", proj.ID);
+            AsanaResponseEventHandler savedCallback = null;
+            savedCallback = (s) =>
+            {
+                // add it manually
+                if (Tags == null)
+                    Tags = new AsanaTag[1];
+                else
+                {
+                    AsanaTag[] lTags = Tags;
+                    Array.Resize(ref lTags, Tags.Length + 1);
+                    Tags = lTags;
+                }
+
+                Tags[Tags.Length - 1] = proj;
+                Saving -= savedCallback;
+            };
+            Saving += savedCallback;
+            return host.Save(this, AsanaFunction.GetFunction(Function.AddTagToTask), Tag);
+        }
+
+        public Task AddTag(AsanaTag proj)
+        {
+            if (Host == null)
+                throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
+            return AddTag(proj, Host);
+        }
+
+        public Task RemoveTag(AsanaTag proj, Asana host)
+        {
+            Dictionary<string, object> Tag = new Dictionary<string, object>();
+            Tag.Add("Tag", proj.ID);
+            AsanaResponseEventHandler savedCallback = null;
+            savedCallback = (s) =>
+            {
+                // add it manually
+                int index = Array.IndexOf(Tags, proj);
+                AsanaTag[] lTags = new AsanaTag[Tags.Length - 1];
+                if (index != 0)
+                    Array.Copy(Tags, lTags, index);
+                Array.Copy(Tags, index + 1, lTags, index, lTags.Length - index);
+
+                Tags = lTags;
+                Saving -= savedCallback;
+            };
+            Saving += savedCallback;
+            return host.Save(this, AsanaFunction.GetFunction(Function.RemoveTagFromTask), Tag);
+        }
+
+        public Task RemoveTag(AsanaTag proj)
+        {
+            if (Host == null)
+                throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
+            return RemoveTag(proj, Host);
         }
     }
 }

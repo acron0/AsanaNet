@@ -9,28 +9,28 @@ namespace AsanaNet
 {
     public class AsanaProject : AsanaObject, IAsanaData
     {
-        [AsanaDataAttribute("name")]
-        public string Name { get; private set; }
+        [AsanaDataAttribute("name", SerializationFlags.Required)] //
+        public string Name { get; set; }
 
-        [AsanaDataAttribute("created_at")]
+        [AsanaDataAttribute("created_at", SerializationFlags.Omit)] //
         public AsanaDateTime CreatedAt { get; private set; }
 
-        [AsanaDataAttribute("modified_at")]
+        [AsanaDataAttribute("modified_at", SerializationFlags.Omit)] //
         public AsanaDateTime ModifiedAt { get; private set; }
 
-        [AsanaDataAttribute("notes")]
-        public string Notes { get; private set; }
+        [AsanaDataAttribute("notes", SerializationFlags.Optional)] //
+        public string Notes { get; set; }
 
-        [AsanaDataAttribute("archived")]
+        [AsanaDataAttribute("archived", SerializationFlags.Omit)] //
         public bool Archived { get; private set; }
 
-        [AsanaDataAttribute("workspace")]
+        [AsanaDataAttribute("workspace", SerializationFlags.Optional, "ID")] //
         public AsanaWorkspace Workspace { get; private set; }
 
-        [AsanaDataAttribute("followers")]
+        [AsanaDataAttribute("followers", SerializationFlags.Optional)] //
         public AsanaUser[] Followers { get; private set; }
 
-        [AsanaDataAttribute("team")]
+        [AsanaDataAttribute("team", SerializationFlags.Optional)] //
         public AsanaTeam Team { get; private set; }
 
         // ------------------------------------------------------
@@ -40,6 +40,21 @@ namespace AsanaNet
         public void Complete()
         {
             throw new NotImplementedException();
+        }
+        
+        public AsanaProject()
+        {
+        }
+
+        public AsanaProject(AsanaWorkspace workspace) 
+        {
+            Workspace = workspace;
+        }
+
+        public AsanaProject(AsanaWorkspace workspace, AsanaTeam team)
+        {
+            Workspace = workspace;
+            Team = team;
         }
 
         public override Task Refresh()

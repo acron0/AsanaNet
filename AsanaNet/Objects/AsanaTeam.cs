@@ -8,7 +8,7 @@ namespace AsanaNet
     public class AsanaTeam : AsanaObject, IAsanaData
     {
         [AsanaDataAttribute("name")]
-        public string Name  { get; private set; }
+        public string Name  { get; set; }
 
         // ------------------------------------------------------
 

@@ -156,28 +156,28 @@ namespace AsanaNet
 
     static public class AsanaObjectExtensions
     {
-        static public void Save(this AsanaObject obj, Asana host, AsanaFunction function)
+        static public Task Save(this AsanaObject obj, Asana host, AsanaFunction function)
         {
-            host.Save(obj, function);
+            return host.Save(obj, function);
         }
 
-        static public void Save(this AsanaObject obj, Asana host)
+        static public Task Save(this AsanaObject obj, Asana host)
         {
-            host.Save(obj, null);
+            return host.Save(obj, null);
         }
 
-        static public void Save(this AsanaObject obj, AsanaFunction function)
+        static public Task Save(this AsanaObject obj, AsanaFunction function)
         {
             if (obj.Host == null)
                 throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
-            obj.Host.Save(obj, function);
+            return obj.Host.Save(obj, function);
         }
 
-        static public void Save(this AsanaObject obj)
+        static public Task Save(this AsanaObject obj)
         {
             if (obj.Host == null)
                 throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
-            obj.Host.Save(obj, null);
+            return obj.Host.Save(obj, null);
         }
     }
 }

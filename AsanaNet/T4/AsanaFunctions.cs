@@ -13,6 +13,7 @@ namespace AsanaNet
 			GetMe,
 			GetUserById,
 			GetWorkspaces,
+			GetWorkspaceById,
 			GetUsersInWorkspace,
 			GetTasksInWorkspace,
 			GetProjectsInWorkspace,
@@ -30,6 +31,9 @@ namespace AsanaNet
 			AddProjectToTask,
 			RemoveProjectFromTask,
 			AddStoryToTask,
+			AddTagToTask,
+			RemoveTagFromTask,
+			CreateWorkspaceProject,
 			UpdateTask,
 			UpdateTag,
 		}
@@ -56,6 +60,11 @@ namespace AsanaNet
 			{
 				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetWorkspaces));
 				return request.Go((o, h) => PackAndSendResponseCollection<AsanaWorkspace>(o, callback), ErrorCallback);
+			}
+			public Task GetWorkspaceById(Int64 arg1, AsanaResponseEventHandler callback)
+			{
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetWorkspaceById), arg1);
+				return request.Go((o, h) => PackAndSendResponse<AsanaWorkspace>(o, callback), ErrorCallback);
 			}
 			public Task GetUsersInWorkspace(AsanaWorkspace arg1, AsanaCollectionResponseEventHandler callback)
 			{
@@ -117,7 +126,7 @@ namespace AsanaNet
 				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTagById), arg1);
 				return request.Go((o, h) => PackAndSendResponse<AsanaTag>(o, callback), ErrorCallback);
 			}
-			public Task GetTeamsInWorkspace(Int64 arg1, AsanaCollectionResponseEventHandler callback)
+			public Task GetTeamsInWorkspace(AsanaWorkspace arg1, AsanaCollectionResponseEventHandler callback)
 			{
 				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTeamsInWorkspace), arg1);
 				return request.Go((o, h) => PackAndSendResponseCollection<AsanaTeam>(o, callback), ErrorCallback);
@@ -133,6 +142,7 @@ namespace AsanaNet
 				Functions.Add(Function.GetMe, new AsanaFunction("/users/me", "GET"));
 				Functions.Add(Function.GetUserById, new AsanaFunction("/users/{0}", "GET"));
 				Functions.Add(Function.GetWorkspaces, new AsanaFunction("/workspaces", "GET"));
+				Functions.Add(Function.GetWorkspaceById, new AsanaFunction("/workspaces/{0}", "GET"));
 				Functions.Add(Function.GetUsersInWorkspace, new AsanaFunction("/workspaces/{0:ID}/users", "GET"));
 				Functions.Add(Function.GetTasksInWorkspace, new AsanaFunction("/workspaces/{0:ID}/tasks?assignee={1:ID}", "GET"));
 				Functions.Add(Function.GetProjectsInWorkspace, new AsanaFunction("/workspaces/{0:ID}/projects", "GET"));
@@ -150,12 +160,16 @@ namespace AsanaNet
 				Functions.Add(Function.AddProjectToTask, new AsanaFunction("/tasks/{0:ID}/addProject", "POST"));
 				Functions.Add(Function.RemoveProjectFromTask, new AsanaFunction("/tasks/{0:ID}/removeProject", "POST"));
 				Functions.Add(Function.AddStoryToTask, new AsanaFunction("/tasks/{0:Target}/stories", "POST"));
+				Functions.Add(Function.AddTagToTask, new AsanaFunction("/tasks/{0:ID}/addTag", "POST"));
+				Functions.Add(Function.RemoveTagFromTask, new AsanaFunction("/tasks/{0:ID}/removeTag", "POST"));
+				Functions.Add(Function.CreateWorkspaceProject, new AsanaFunction("/projects", "POST"));
 				Functions.Add(Function.UpdateTask, new AsanaFunction("/tasks/{0:ID}", "PUT"));
 				Functions.Add(Function.UpdateTag, new AsanaFunction("/tags/{0:ID}", "PUT"));
 		
 
 				Associations.Add(typeof(AsanaTask), new AsanaFunctionAssociation(GetFunction(Function.CreateWorkspaceTask), GetFunction(Function.UpdateTask)));
 				Associations.Add(typeof(AsanaStory), new AsanaFunctionAssociation(GetFunction(Function.AddStoryToTask), null));
+				Associations.Add(typeof(AsanaProject), new AsanaFunctionAssociation(GetFunction(Function.CreateWorkspaceProject), null));
 		
 			}
 		}
