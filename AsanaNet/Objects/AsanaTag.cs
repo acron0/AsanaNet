@@ -5,6 +5,7 @@ using System.Text;
 
 namespace AsanaNet
 {
+    [Serializable]
     public class AsanaTag : AsanaObject, IAsanaData
     {
         [AsanaDataAttribute     ("notes",       SerializationFlags.Optional)]
@@ -29,6 +30,11 @@ namespace AsanaNet
         public void Complete()
         {
             throw new NotImplementedException();
+        }
+        
+        public AsanaTag(AsanaWorkspace workspace) 
+        {
+            Workspace = workspace;
         }
 
         //

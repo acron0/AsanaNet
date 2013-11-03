@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace AsanaNet
 {
+    [Serializable]
     public class AsanaProject : AsanaObject, IAsanaData
     {
         [AsanaDataAttribute("name", SerializationFlags.Required)] //
@@ -30,7 +31,7 @@ namespace AsanaNet
         [AsanaDataAttribute("followers", SerializationFlags.Optional)] //
         public AsanaUser[] Followers { get; private set; }
 
-        [AsanaDataAttribute("team", SerializationFlags.Optional)] //
+        [AsanaDataAttribute("team", SerializationFlags.Optional, "ID")] //
         public AsanaTeam Team { get; private set; }
 
         // ------------------------------------------------------

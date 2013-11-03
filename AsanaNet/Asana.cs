@@ -22,6 +22,7 @@ namespace AsanaNet
 		OAuth
 	}
 
+    [Serializable]
     public partial class Asana
     {        
         #region Variables

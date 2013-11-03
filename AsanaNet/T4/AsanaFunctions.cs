@@ -34,6 +34,7 @@ namespace AsanaNet
 			AddTagToTask,
 			RemoveTagFromTask,
 			CreateWorkspaceProject,
+			CreateWorkspaceTag,
 			UpdateTask,
 			UpdateTag,
 		}
@@ -163,6 +164,7 @@ namespace AsanaNet
 				Functions.Add(Function.AddTagToTask, new AsanaFunction("/tasks/{0:ID}/addTag", "POST"));
 				Functions.Add(Function.RemoveTagFromTask, new AsanaFunction("/tasks/{0:ID}/removeTag", "POST"));
 				Functions.Add(Function.CreateWorkspaceProject, new AsanaFunction("/projects", "POST"));
+				Functions.Add(Function.CreateWorkspaceTag, new AsanaFunction("/tags", "POST"));
 				Functions.Add(Function.UpdateTask, new AsanaFunction("/tasks/{0:ID}", "PUT"));
 				Functions.Add(Function.UpdateTag, new AsanaFunction("/tags/{0:ID}", "PUT"));
 		
@@ -170,6 +172,7 @@ namespace AsanaNet
 				Associations.Add(typeof(AsanaTask), new AsanaFunctionAssociation(GetFunction(Function.CreateWorkspaceTask), GetFunction(Function.UpdateTask)));
 				Associations.Add(typeof(AsanaStory), new AsanaFunctionAssociation(GetFunction(Function.AddStoryToTask), null));
 				Associations.Add(typeof(AsanaProject), new AsanaFunctionAssociation(GetFunction(Function.CreateWorkspaceProject), null));
+				Associations.Add(typeof(AsanaTag), new AsanaFunctionAssociation(GetFunction(Function.CreateWorkspaceTag), null));
 		
 			}
 		}

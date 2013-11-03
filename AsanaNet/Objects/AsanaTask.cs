@@ -14,6 +14,7 @@ namespace AsanaNet
         upcoming        //	Marked as upcoming.
     }
 
+    [Serializable]
     public class AsanaTask : AsanaObject, IAsanaData
     {
         [AsanaDataAttribute     ("name",            SerializationFlags.Required)]
@@ -138,7 +139,7 @@ namespace AsanaNet
         public Task AddTag(AsanaTag proj, Asana host)
         {
             Dictionary<string, object> Tag = new Dictionary<string, object>();
-            Tag.Add("Tag", proj.ID);
+            Tag.Add("tag", proj.ID);
             AsanaResponseEventHandler savedCallback = null;
             savedCallback = (s) =>
             {
@@ -169,7 +170,7 @@ namespace AsanaNet
         public Task RemoveTag(AsanaTag proj, Asana host)
         {
             Dictionary<string, object> Tag = new Dictionary<string, object>();
-            Tag.Add("Tag", proj.ID);
+            Tag.Add("tag", proj.ID);
             AsanaResponseEventHandler savedCallback = null;
             savedCallback = (s) =>
             {

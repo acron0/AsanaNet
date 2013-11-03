@@ -5,6 +5,7 @@ using System.Text;
 
 namespace AsanaNet
 {
+    [Serializable]
     public class AsanaStory : AsanaObject, IAsanaData
     {
         [AsanaDataAttribute     ("type",        SerializationFlags.Omit)]

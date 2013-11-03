@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using System.Threading.Tasks;
+
 namespace AsanaNet
 {
+    [Serializable]
     public class AsanaWorkspace : AsanaObject, IAsanaData
     {
         [AsanaDataAttribute("name")]
@@ -20,6 +23,15 @@ namespace AsanaNet
         public void Complete()
         {
             throw new NotImplementedException();
+        }
+
+        public override Task Refresh()
+        {
+            return Host.GetWorkspaceById(ID, workspace =>
+            {
+                Name = (workspace as AsanaWorkspace).Name;
+                IsOrganization = (workspace as AsanaWorkspace).IsOrganization;
+            });
         }
     }
 }

@@ -16,6 +16,7 @@ namespace AsanaNet
         //void Complete();
     }
 
+    [Serializable]
     public abstract class AsanaObject
     {
         [AsanaDataAttribute("id", SerializationFlags.Omit)]
@@ -135,6 +136,7 @@ namespace AsanaNet
     {
     }
 
+    [Serializable]
     public class AsanaObjectCollection : List<AsanaObject>, IAsanaObjectCollection
     {
     }

@@ -40,8 +40,8 @@ Copyright 2012 Antony WOods
   <Function method="POST" name="AddStoryToTask"         formation="/tasks/{0:Target}/stories"                 parameters="AsanaTask"                                                                    />
   <Function method="POST" name="AddTagToTask"           formation="/tasks/{0:ID}/addTag"                      parameters="AsanaTask"                                                                    />
   <Function method="POST" name="RemoveTagFromTask"      formation="/tasks/{0:ID}/removeTag"                   parameters="AsanaTask"                                                                    />
-  <Function method="POST" name="CreateWorkspaceProject" formation="/projects"                                 parameters="AsanaWorkspace"                                                               />
-  <!--<Function method="POST" name="CreateOrganizationProject" formation="/projects"            parameters="AsanaWorkspace, AsanaTeam"                                                    />-->
+  <Function method="POST" name="CreateWorkspaceProject" formation="/projects"                                 parameters="AsanaWorkspace, AsanaTeam"                                                    />
+  <Function method="POST" name="CreateWorkspaceTag"     formation="/tags"                                     parameters="AsanaWorkspace"                                                               />
 
   <!-- PUT Functions -->                                                                                                                              
   <Function method="PUT" name="UpdateTask"              formation="/tasks/{0:ID}"                             parameters="AsanaTask"                                                                    />
@@ -56,5 +56,6 @@ Copyright 2012 Antony WOods
   <Association type="AsanaTask"   create="CreateWorkspaceTask"  update="UpdateTask" />
   <Association type="AsanaStory"  create="AddStoryToTask"       update="" />
   <Association type="AsanaProject"  create="CreateWorkspaceProject"  update="" />
+  <Association type="AsanaTag"    create="CreateWorkspaceTag"   update="" />
 
 </AsanaFunctions>
