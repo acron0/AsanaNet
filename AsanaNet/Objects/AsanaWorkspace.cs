@@ -14,7 +14,7 @@ namespace AsanaNet
         public string Name  { get; private set; }
 
         [AsanaDataAttribute("is_organization")]
-        public bool IsOrganization { get; private set; }
+        public bool? IsOrganization { get; private set; }
 
         // ------------------------------------------------------
 
