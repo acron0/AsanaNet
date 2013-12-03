@@ -46,16 +46,22 @@ Copyright 2012 Antony WOods
   <!-- PUT Functions -->                                                                                                                              
   <Function method="PUT" name="UpdateTask"              formation="/tasks/{0:ID}"                             parameters="AsanaTask"                                                                    />
   <Function method="PUT" name="UpdateTag"               formation="/tags/{0:ID}"                              parameters="AsanaTag"                                                                     />
+  <Function method="PUT" name="UpdateProject"           formation="/projects/{0:ID}"                          parameters="AsanaProject"                                                                 />
+  <Function method="PUT" name="UpdateWorkspace"         formation="/workspaces/{0:ID}"                        parameters="AsanaWorkspace"                                                               />
 
+  <!-- DELETE Functions -->
+  <Function method="DELETE" name="DeleteTask"           formation="/tasks/{0:ID}"                             parameters="AsanaTask"                                                                    />
+  <Function method="DELETE" name="DeleteProject"        formation="/projects/{0:ID}"                          parameters="AsanaProject"                                                                 />
 
   <!--
     Associations define what is essentially a novelty feature within the application.
     At certain points, it will attempt to 'create' an object if one doesnt exist on the database.
     Alternatively, it will be updating an existing object.
   -->
-  <Association type="AsanaTask"   create="CreateWorkspaceTask"  update="UpdateTask" />
-  <Association type="AsanaStory"  create="AddStoryToTask"       update="" />
-  <Association type="AsanaProject"  create="CreateWorkspaceProject"  update="" />
-  <Association type="AsanaTag"    create="CreateWorkspaceTag"   update="" />
+  <Association type="AsanaWorkspace" create=""                          update="UpdateWorkspace"   delete="" />
+  <Association type="AsanaTask"      create="CreateWorkspaceTask"       update="UpdateTask"        delete="DeleteTask" />
+  <Association type="AsanaProject"   create="CreateWorkspaceProject"    update="UpdateProject"     delete="DeleteProject" />
+  <Association type="AsanaTag"       create="CreateWorkspaceTag"        update="UpdateTag"         delete="" />
+  <Association type="AsanaStory"     create="AddStoryToTask"            update=""                  delete="" />
 
 </AsanaFunctions>

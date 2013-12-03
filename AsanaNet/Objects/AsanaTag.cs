@@ -31,9 +31,15 @@ namespace AsanaNet
         {
             throw new NotImplementedException();
         }
-        
-        public AsanaTag(AsanaWorkspace workspace) 
+
+        static public implicit operator AsanaTag(Int64 ID)
         {
+            return Create(typeof(AsanaTag), ID) as AsanaTag;
+        }
+        
+        public AsanaTag(AsanaWorkspace workspace, Int64 id = 0) 
+        {
+            ID = id;
             Workspace = workspace;
         }
 

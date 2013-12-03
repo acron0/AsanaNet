@@ -20,7 +20,7 @@ namespace AsanaNet
     public abstract class AsanaObject
     {
         [AsanaDataAttribute("id", SerializationFlags.Omit)]
-        public Int64 ID { get; private set; }
+        public Int64 ID { get; protected set; }
 
         public Asana Host { get; protected set; }
 
@@ -80,6 +80,19 @@ namespace AsanaNet
         }
 
         /// <summary>
+        /// Creates a new T without requiring a public constructor
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="ID"></param>
+        /// <returns></returns>
+        internal static AsanaObject Create(Type t, Int64 ID)
+        {
+            AsanaObject o = Create(t);
+            o.ID = ID;
+            return o;
+        }
+
+        /// <summary>
         /// Parameterless contructor
         /// </summary>
         internal AsanaObject()
@@ -118,7 +131,6 @@ namespace AsanaNet
             }
 
             return false;
-
         }
 
         public override int GetHashCode()
@@ -180,6 +192,18 @@ namespace AsanaNet
             if (obj.Host == null)
                 throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
             return obj.Host.Save(obj, null);
+        }
+
+        static public Task Delete(this AsanaObject obj, Asana host)
+        {
+            return host.Delete(obj);
+        }
+
+        static public Task Delete(this AsanaObject obj)
+        {
+            if (obj.Host == null)
+                throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
+            return obj.Host.Delete(obj);
         }
     }
 }

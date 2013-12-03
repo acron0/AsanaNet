@@ -18,11 +18,16 @@ namespace AsanaNet
 
         // ------------------------------------------------------
 
-        public bool IsObjectLocal { get { return true; } }
+        public bool IsObjectLocal { get { return ID == 0; } }
 
         public void Complete()
         {
             throw new NotImplementedException();
+        }
+
+        static public implicit operator AsanaWorkspace(Int64 ID)
+        {
+            return Create(typeof(AsanaWorkspace), ID) as AsanaWorkspace;
         }
 
         public override Task Refresh()

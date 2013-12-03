@@ -77,6 +77,12 @@ namespace AsanaNet
             Workspace = workspace;
         }
 
+        public AsanaTask(AsanaWorkspace workspace, Int64 id = 0) 
+        {
+            ID = id;
+            Workspace = workspace;
+        }
+
         public Task AddProject(AsanaProject proj, Asana host)
         {
             Dictionary<string, object> project = new Dictionary<string, object>();

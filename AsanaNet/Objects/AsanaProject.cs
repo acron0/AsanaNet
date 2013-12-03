@@ -34,26 +34,42 @@ namespace AsanaNet
         [AsanaDataAttribute("team", SerializationFlags.Optional, "ID")] //
         public AsanaTeam Team { get; private set; }
 
+        [AsanaDataAttribute("color", SerializationFlags.Omit)] //
+        public string Color { get; private set; }
+
         // ------------------------------------------------------
 
-        public bool IsObjectLocal { get { return true; } }
+        //public bool IsObjectLocal { get { return true; } }
+        public bool IsObjectLocal { get { return ID == 0; } }
 
         public void Complete()
         {
             throw new NotImplementedException();
         }
-        
-        public AsanaProject()
+
+        internal AsanaProject()
         {
         }
 
-        public AsanaProject(AsanaWorkspace workspace) 
+        static public implicit operator AsanaProject(Int64 ID)
         {
+            return Create(typeof(AsanaProject), ID) as AsanaProject;
+        }
+
+        public AsanaProject(Int64 id = 0)
+        {
+            ID = id;
+        }
+
+        public AsanaProject(AsanaWorkspace workspace, Int64 id = 0) 
+        {
+            ID = id;
             Workspace = workspace;
         }
 
-        public AsanaProject(AsanaWorkspace workspace, AsanaTeam team)
+        public AsanaProject(AsanaWorkspace workspace, AsanaTeam team, Int64 id = 0)
         {
+            ID = id;
             Workspace = workspace;
             Team = team;
         }
@@ -70,6 +86,7 @@ namespace AsanaNet
                 Workspace = (project as AsanaProject).Workspace;
                 Followers = (project as AsanaProject).Followers;
                 Team = (project as AsanaProject).Team;
+                Color = (project as AsanaProject).Color;
             });
         }
     }
