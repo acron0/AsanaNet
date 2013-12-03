@@ -1,11 +1,58 @@
 ﻿<#@ template debug="false" hostspecific="false" language="C#" #>
 <#@ output extension=".cs" #>
 <#@ assembly name="System.Xml" #>
+<#@ import namespace="System.Collections.Generic" #>
 <#
  System.Xml.XmlDocument configurationData = new System.Xml.XmlDocument();
- configurationData.Load("AsanaNet/T4/AsanaFunctionDefinitions.xml");
+ configurationData.Load(@"AsanaNet/T4/AsanaFunctionDefinitions.xml");
  System.Xml.XmlNodeList functionList = configurationData.GetElementsByTagName("Function");
  System.Xml.XmlNodeList associationList = configurationData.GetElementsByTagName("Association");
+ 
+Dictionary<string, List<System.Xml.XmlNode>> functionByParams = new Dictionary<string, List<System.Xml.XmlNode>>();
+ 
+foreach (System.Xml.XmlNode function in functionList)
+{
+	if(function.Attributes["method"].Value != "GET")
+		continue;
+		
+	string[] parameters = function.Attributes["parameters"].Value.Split(',');
+	string parameterStringWithType = "";
+	string parameterStringNoType = "";
+	string secondArgumentComma = "";
+	for(int i = 0; i < parameters.Length; ++i)
+	{
+		if(!string.IsNullOrWhiteSpace(parameters[i]))
+		{
+			if(i < parameters.Length-1)
+			{
+				parameterStringWithType += parameters[i] + " arg" + (i+1) + ", ";
+			}
+			else
+			{
+				parameterStringWithType += parameters[i] + " arg" + (i+1);
+			}
+			parameterStringNoType += ", arg" + (i+1);
+		}
+		if(!string.IsNullOrWhiteSpace(parameterStringWithType))
+		{
+			secondArgumentComma = ", ";
+		}
+	}
+			
+	bool isCollection = false;
+	bool.TryParse(function.Attributes["collection"].Value, out isCollection);
+	string packMethodString = isCollection ? "PackAndSendResponseCollection" : "PackAndSendResponse";
+	string responseTypeString = isCollection ? "AsanaCollectionResponseEventHandler" : "AsanaResponseEventHandler";
+
+	string paramsCombined = parameterStringWithType + secondArgumentComma + responseTypeString;
+
+	if(!functionByParams.ContainsKey(paramsCombined))
+	{
+		functionByParams.Add(paramsCombined, new List<System.Xml.XmlNode>());
+	}
+	functionByParams[paramsCombined].Add(function);
+}
+
 #>
 using System;
 using System.Threading.Tasks;
@@ -30,8 +77,8 @@ namespace AsanaNet
 
 		// Function definitions specifically for the GET functions.
 		public partial class Asana
-		{   
-	<#
+		{
+<#
 		foreach (System.Xml.XmlNode function in functionList)
 		{
 			if(function.Attributes["method"].Value != "GET")
@@ -65,16 +112,84 @@ namespace AsanaNet
 			bool.TryParse(function.Attributes["collection"].Value, out isCollection);
 			string packMethodString = isCollection ? "PackAndSendResponseCollection" : "PackAndSendResponse";
 			string responseTypeString = isCollection ? "AsanaCollectionResponseEventHandler" : "AsanaResponseEventHandler";
-		
-	#>
-		public Task <#= function.Attributes["name"].Value #>(<#= parameterStringWithType #><#= secondArgumentComma #><#=responseTypeString#> callback)
+#>
+			public Task <#= function.Attributes["name"].Value #>(<#= parameterStringWithType #><#= secondArgumentComma #><#=responseTypeString#> callback)
 			{
 				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.<#= function.Attributes["name"].Value #>)<#=parameterStringNoType#>);
 				return request.Go((o, h) => <#=packMethodString#><<#= function.Attributes["return"].Value #>>(o, callback), ErrorCallback);
 			}
-	<#
-		} 
-	#>
+
+
+
+<#		} 
+#>
+
+
+<#
+foreach (KeyValuePair<string, List<System.Xml.XmlNode>> functions in functionByParams)
+{
+#>
+
+			public Task Get<AsanaT>(<#=functions.Key#> callback) where AsanaT : AsanaObject
+			{
+				AsanaRequest request = default(AsanaRequest);
+				<#
+				foreach(System.Xml.XmlNode function in functions.Value)
+				{
+
+					// REDUNDANT, PLEASE MAKE MORE OPTIMAL (START)
+				
+					string[] parameters = function.Attributes["parameters"].Value.Split(',');
+					string parameterStringWithType = "";
+					string parameterStringNoType = "";
+					string secondArgumentComma = "";
+					for(int i = 0; i < parameters.Length; ++i)
+					{
+						if(!string.IsNullOrWhiteSpace(parameters[i]))
+						{
+							if(i < parameters.Length-1)
+							{
+								parameterStringWithType += parameters[i] + " arg" + (i+1) + ", ";
+							}
+							else
+							{
+								parameterStringWithType += parameters[i] + " arg" + (i+1);
+							}
+							parameterStringNoType += ", arg" + (i+1);
+						}
+						if(!string.IsNullOrWhiteSpace(parameterStringWithType))
+						{
+							secondArgumentComma = ", ";
+						}
+					}
+			
+					bool isCollection = false;
+					bool.TryParse(function.Attributes["collection"].Value, out isCollection);
+					string packMethodString = isCollection ? "PackAndSendResponseCollection" : "PackAndSendResponse";
+					string responseTypeString = isCollection ? "AsanaCollectionResponseEventHandler" : "AsanaResponseEventHandler";
+
+					// REDUNDANT END
+
+				#>
+				
+				if(typeof(AsanaT) == typeof(<#= function.Attributes["return"].Value #>))
+				{
+					request = GetBaseRequest(AsanaFunction.GetFunction(Function.<#= function.Attributes["name"].Value #>)<#=parameterStringNoType#>);
+					return request.Go((o, h) => <#=packMethodString#><<#= function.Attributes["return"].Value #>>(o, callback), ErrorCallback);
+				}
+
+				<#
+				}
+				#>
+				
+                throw new TypeAccessException("Unknown type for this request: " + typeof(AsanaT).Name);
+			}
+
+<#
+}
+#>
+
+
 	}
 
 		// Binds the enums, formations and methods
@@ -97,17 +212,24 @@ namespace AsanaNet
 			{		
 				string create = association.Attributes["create"].Value;
 				string update = association.Attributes["update"].Value;
+				string delete = association.Attributes["delete"].Value;
+
 				if(!string.IsNullOrWhiteSpace(create))
 					create = string.Format("GetFunction(Function.{0})", create);
 				else
 					create = "null";
 
 				if(!string.IsNullOrWhiteSpace(update))
-					update = string.Format("GetFunction(Function.{0}))", update);
+					update = string.Format("GetFunction(Function.{0})", update);
 				else
-					update = "null)";
+					update = "null";
+
+				if(!string.IsNullOrWhiteSpace(delete))
+					delete = string.Format("GetFunction(Function.{0}))", delete);
+				else
+					delete = "null)";
 		#>
-		Associations.Add(typeof(<#=association.Attributes["type"].Value#>), new AsanaFunctionAssociation(<#=create#>, <#=update#>);
+		Associations.Add(typeof(<#=association.Attributes["type"].Value#>), new AsanaFunctionAssociation(<#=create#>, <#=update#>, <#=delete#>);
 		<#
 			} 
 		#>
