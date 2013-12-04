@@ -16,10 +16,11 @@ namespace AsanaNet
         //void Complete();
     }
 
+    [Serializable]
     public abstract class AsanaObject
     {
         [AsanaDataAttribute("id", SerializationFlags.Omit)]
-        public Int64 ID { get; private set; }
+        public Int64 ID { get; protected set; }
 
         public Asana Host { get; protected set; }
 
@@ -79,6 +80,19 @@ namespace AsanaNet
         }
 
         /// <summary>
+        /// Creates a new T without requiring a public constructor
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="ID"></param>
+        /// <returns></returns>
+        internal static AsanaObject Create(Type t, Int64 ID)
+        {
+            AsanaObject o = Create(t);
+            o.ID = ID;
+            return o;
+        }
+
+        /// <summary>
         /// Parameterless contructor
         /// </summary>
         internal AsanaObject()
@@ -117,7 +131,6 @@ namespace AsanaNet
             }
 
             return false;
-
         }
 
         public override int GetHashCode()
@@ -135,6 +148,7 @@ namespace AsanaNet
     {
     }
 
+    [Serializable]
     public class AsanaObjectCollection : List<AsanaObject>, IAsanaObjectCollection
     {
     }
@@ -156,28 +170,40 @@ namespace AsanaNet
 
     static public class AsanaObjectExtensions
     {
-        static public void Save(this AsanaObject obj, Asana host, AsanaFunction function)
+        static public Task Save(this AsanaObject obj, Asana host, AsanaFunction function)
         {
-            host.Save(obj, function);
+            return host.Save(obj, function);
         }
 
-        static public void Save(this AsanaObject obj, Asana host)
+        static public Task Save(this AsanaObject obj, Asana host)
         {
-            host.Save(obj, null);
+            return host.Save(obj, null);
         }
 
-        static public void Save(this AsanaObject obj, AsanaFunction function)
+        static public Task Save(this AsanaObject obj, AsanaFunction function)
         {
             if (obj.Host == null)
                 throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
-            obj.Host.Save(obj, function);
+            return obj.Host.Save(obj, function);
         }
 
-        static public void Save(this AsanaObject obj)
+        static public Task Save(this AsanaObject obj)
         {
             if (obj.Host == null)
                 throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
-            obj.Host.Save(obj, null);
+            return obj.Host.Save(obj, null);
+        }
+
+        static public Task Delete(this AsanaObject obj, Asana host)
+        {
+            return host.Delete(obj);
+        }
+
+        static public Task Delete(this AsanaObject obj)
+        {
+            if (obj.Host == null)
+                throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
+            return obj.Host.Delete(obj);
         }
     }
 }

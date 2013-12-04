@@ -34,11 +34,13 @@ namespace AsanaNet
     {
         public AsanaFunction Create { get; private set; }
         public AsanaFunction Update { get; private set; }
+        public AsanaFunction Delete { get; private set; }
 
-        public AsanaFunctionAssociation(AsanaFunction create, AsanaFunction update)
+        public AsanaFunctionAssociation(AsanaFunction create, AsanaFunction update, AsanaFunction delete)
         {
             Create = create;
             Update = update;
+            Delete = delete;
         }
     }
 }

@@ -77,7 +77,15 @@ namespace AsanaNet
                     {
                         HttpWebRequest request = (HttpWebRequest)_request;
                         AsanaRequest state = (AsanaRequest)requestTask.AsyncState;
+
+                        if (requestTask.IsFaulted)
+                        {
+                            _error(request.Address.AbsoluteUri, requestTask.Exception.InnerException.Message, "");
+                            return;
+                        }
+                        
                         WebResponse result = requestTask.Result;
+                        
                         if (result.Headers["Retry-After"] != null)
                         {
                             string retryAfter = result.Headers["Retry-After"];
@@ -86,11 +94,6 @@ namespace AsanaNet
                             return;
                         }
                         string responseContent = GetResponseContent(result);
-                        if (requestTask.IsFaulted)
-                        {
-                            _error(result.ResponseUri.AbsoluteUri, requestTask.Exception.InnerException.Message, responseContent);
-                            return;
-                        }
                         _callback(responseContent, result.Headers);
                     }
             );

@@ -5,6 +5,7 @@ using System.Text;
 
 namespace AsanaNet
 {
+    [Serializable]
     public class AsanaTag : AsanaObject, IAsanaData
     {
         [AsanaDataAttribute     ("notes",       SerializationFlags.Optional)]
@@ -29,6 +30,17 @@ namespace AsanaNet
         public void Complete()
         {
             throw new NotImplementedException();
+        }
+
+        static public implicit operator AsanaTag(Int64 ID)
+        {
+            return Create(typeof(AsanaTag), ID) as AsanaTag;
+        }
+        
+        public AsanaTag(AsanaWorkspace workspace, Int64 id = 0) 
+        {
+            ID = id;
+            Workspace = workspace;
         }
 
         //

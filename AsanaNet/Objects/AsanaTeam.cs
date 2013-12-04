@@ -5,6 +5,7 @@ using System.Text;
 
 namespace AsanaNet
 {
+    [Serializable]
     public class AsanaTeam : AsanaObject, IAsanaData
     {
         [AsanaDataAttribute("name")]
@@ -17,6 +18,11 @@ namespace AsanaNet
         public void Complete()
         {
             throw new NotImplementedException();
+        }
+
+        static public implicit operator AsanaTeam(Int64 ID)
+        {
+            return Create(typeof(AsanaTeam), ID) as AsanaTeam;
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Globalization;
 
 namespace AsanaNet
 {
+    [Serializable]
     [TypeConverter(typeof(AsanaDateTimeConverter))]
     public class AsanaDateTime
     {

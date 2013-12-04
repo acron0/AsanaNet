@@ -22,6 +22,7 @@ namespace AsanaNet
 		OAuth
 	}
 
+    [Serializable]
     public partial class Asana
     {        
         #region Variables
@@ -232,6 +233,32 @@ namespace AsanaNet
                 func = idata.IsObjectLocal ? afa.Create : afa.Update;
 
             request = GetBaseRequestWithParams(func, data, obj);
+            return request.Go((o, h) => RepackAndCallback(o, obj), ErrorCallback);
+        }
+
+        /// <summary>
+        /// Tells asana to delete the specified object
+        /// </summary>
+        /// <param name="obj"></param>
+        internal Task Delete<T>(T obj) where T : AsanaObject
+        {
+            AsanaFunction func;
+
+            IAsanaData idata = obj as IAsanaData;
+            if (idata == null)
+                throw new NullReferenceException("All AsanaObjects must implement IAsanaData in order to Delete themselves.");
+
+            AsanaRequest request = null;
+            AsanaFunctionAssociation afa = AsanaFunction.GetFunctionAssociation(obj.GetType());
+
+            if (idata.IsObjectLocal == false)
+                func = afa.Delete;
+            else 
+                throw new Exception("Object is local, cannot delete.");
+
+            if (Object.ReferenceEquals(func, null)) throw new NotImplementedException("This object cannot delete itself.");
+
+            request = GetBaseRequest(func, obj);
             return request.Go((o, h) => RepackAndCallback(o, obj), ErrorCallback);
         }
 

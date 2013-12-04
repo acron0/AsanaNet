@@ -5,6 +5,7 @@ using System.Text;
 
 namespace AsanaNet
 {
+    [Serializable]
     public class AsanaUser : AsanaObject, IAsanaData
     {
         [AsanaDataAttribute("name")]
