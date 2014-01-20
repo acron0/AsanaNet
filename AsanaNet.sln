@@ -1,7 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsanaNet", "AsanaNet\AsanaNet.csproj", "{3740ED7E-52B6-4D40-92CD-DF0FF0E855E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsanaNetTests", "AsanaNetTests\AsanaNetTests.csproj", "{38A6689C-6317-4481-B82A-FDE109149483}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3740ED7E-52B6-4D40-92CD-DF0FF0E855E2} = {3740ED7E-52B6-4D40-92CD-DF0FF0E855E2}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,6 +30,16 @@ Global
 		{3740ED7E-52B6-4D40-92CD-DF0FF0E855E2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{3740ED7E-52B6-4D40-92CD-DF0FF0E855E2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{3740ED7E-52B6-4D40-92CD-DF0FF0E855E2}.Release|x86.ActiveCfg = Release|Any CPU
+		{38A6689C-6317-4481-B82A-FDE109149483}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38A6689C-6317-4481-B82A-FDE109149483}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38A6689C-6317-4481-B82A-FDE109149483}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{38A6689C-6317-4481-B82A-FDE109149483}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{38A6689C-6317-4481-B82A-FDE109149483}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{38A6689C-6317-4481-B82A-FDE109149483}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38A6689C-6317-4481-B82A-FDE109149483}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38A6689C-6317-4481-B82A-FDE109149483}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{38A6689C-6317-4481-B82A-FDE109149483}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{38A6689C-6317-4481-B82A-FDE109149483}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

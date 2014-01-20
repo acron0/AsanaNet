@@ -23,6 +23,9 @@ namespace AsanaNet
         [AsanaDataAttribute     ("workspace",   SerializationFlags.Required, "ID")]
         public AsanaWorkspace   Workspace       { get; private set; }
 
+        [AsanaDataAttribute     ("color",       SerializationFlags.Omit)]
+        public string           Color           { get; private set; }
+
         // ------------------------------------------------------
 
         public bool IsObjectLocal { get { return ID == 0; } }
@@ -41,6 +44,8 @@ namespace AsanaNet
         {
             ID = id;
             Workspace = workspace;
+            // cache current state
+            SavingCallback(Parsing.Serialize(this, false, true));
         }
 
         //

@@ -47,6 +47,9 @@ namespace AsanaNet
         [AsanaDataAttribute     ("notes",           SerializationFlags.Optional)]
         public string           Notes               { get; set; }
 
+        [AsanaDataAttribute     ("parent",          SerializationFlags.Optional)]
+        public AsanaTask        Parent              { get; internal set; }
+
         [AsanaDataAttribute     ("projects",        SerializationFlags.Optional, "ID")]
         public AsanaProject[]   Projects            { get; private set; }
 
@@ -54,7 +57,7 @@ namespace AsanaNet
         public AsanaTag[]       Tags                { get; private set; }
 
         [AsanaDataAttribute     ("workspace",       SerializationFlags.Required, "ID")]
-        public AsanaWorkspace   Workspace           { get; private set; }
+        public AsanaWorkspace   Workspace           { get; internal set; }
 
         // ------------------------------------------------------
 
@@ -72,15 +75,23 @@ namespace AsanaNet
             
         }
 
+        static public implicit operator AsanaTask(Int64 ID)
+        {
+            return Create(typeof(AsanaTask), ID) as AsanaTask;
+        }
+
         public AsanaTask(AsanaWorkspace workspace) 
         {
             Workspace = workspace;
         }
 
-        public AsanaTask(AsanaWorkspace workspace, Int64 id = 0) 
+        public AsanaTask(AsanaWorkspace workspace, Int64 id) 
         {
             ID = id;
             Workspace = workspace;
+            // cache current state
+            SetAsReferenceObject();
+            //SavingCallback(Parsing.Serialize(this, false, true));
         }
 
         public Task AddProject(AsanaProject proj, Asana host)
@@ -105,6 +116,13 @@ namespace AsanaNet
             };
             Saving += savedCallback;
             return host.Save(this, AsanaFunction.GetFunction(Function.AddProjectToTask), project);
+        }
+
+        public Task SetParent(AsanaTask task, Asana host)
+        {
+            Dictionary<string, object> parent = new Dictionary<string, object>();
+            parent.Add("parent", task.ID);
+            return host.Save(this, AsanaFunction.GetFunction(Function.SetParentTask), parent);
         }
 
         public Task AddProject(AsanaProject proj)
