@@ -80,18 +80,22 @@ namespace AsanaNet
             return Create(typeof(AsanaTask), ID) as AsanaTask;
         }
 
-        public AsanaTask(AsanaWorkspace workspace) 
+        public AsanaTask(AsanaWorkspace workspace, AsanaTask parentTask = null) 
         {
             Workspace = workspace;
+            if (parentTask != null)
+                Parent = parentTask;
         }
 
-        public AsanaTask(AsanaWorkspace workspace, Int64 id) 
+        public AsanaTask(AsanaWorkspace workspace, Int64 id, AsanaTask parentTask = null) 
         {
             ID = id;
             Workspace = workspace;
+            if (parentTask != null)
+                Parent = parentTask;
+
             // cache current state
             SetAsReferenceObject();
-            //SavingCallback(Parsing.Serialize(this, false, true));
         }
 
         public Task AddProject(AsanaProject proj, Asana host)
