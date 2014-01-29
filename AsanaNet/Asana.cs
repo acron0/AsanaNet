@@ -86,7 +86,7 @@ namespace AsanaNet
 
             var defaultAuth = new System.Net.Http.Headers.AuthenticationHeaderValue(AuthType == AuthenticationType.OAuth ? "Bearer" : "Basic", AuthType == AuthenticationType.OAuth ? OAuthToken : EncodedAPIKey);
             _baseHttpClient.DefaultRequestHeaders.Authorization = defaultAuth;
-            _baseHttpClient.DefaultRequestHeaders.UserAgent.ParseAdd("AsanaNet (github.com/acron0/AsanaNet)"); //.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("AsanaNet - github.com/acron0/AsanaNet", "1.0"));
+			_baseHttpClient.DefaultRequestHeaders.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("AsanaNet", "1.1-async"));
             _baseHttpClient.DefaultRequestHeaders.Accept.Add(
                 new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -257,8 +257,11 @@ namespace AsanaNet
                 throw new NullReferenceException("All AsanaObjects must implement IAsanaData in order to Save themselves.");
 
             if (data == null)
-                data = Parsing.Serialize(obj, true, !idata.IsObjectLocal);
-            AsanaRequest request = null;
+				data = Parsing.Serialize(obj, true, !idata.IsObjectLocal);
+
+			// depracated var
+			//AsanaRequest request = null;
+
             AsanaFunctionAssociation afa = AsanaFunction.GetFunctionAssociation(obj.GetType());
 
             if (func == null)
@@ -289,7 +292,9 @@ namespace AsanaNet
             if (idata == null)
                 throw new NullReferenceException("All AsanaObjects must implement IAsanaData in order to Delete themselves.");
 
-            AsanaRequest request = null;
+			// depracated var
+			//AsanaRequest request = null;
+
             AsanaFunctionAssociation afa = AsanaFunction.GetFunctionAssociation(obj.GetType());
 
             if (idata.IsObjectLocal == false)
