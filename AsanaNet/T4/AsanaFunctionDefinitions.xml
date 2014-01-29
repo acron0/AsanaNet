@@ -24,6 +24,7 @@ Copyright 2012 Antony WOods
   <Function method="GET" name="GetProjectsInWorkspace"  formation="/workspaces/{0:ID}/projects"               parameters="AsanaWorkspace"               return="AsanaProject"       collection="true"   />
   <Function method="GET" name="GetTagsInWorkspace"      formation="/workspaces/{0:ID}/tags"                   parameters="AsanaWorkspace"               return="AsanaTag"           collection="true"   />
   <Function method="GET" name="GetTaskById"             formation="/tasks/{0}"                                parameters="Int64"                        return="AsanaTask"          collection="false"  />
+  <Function method="GET" name="GetSubtasksInTask"       formation="/tasks/{0:ID}/subtasks"                    parameters="AsanaTask"                    return="AsanaTask"          collection="true"   />
   <Function method="GET" name="GetStoriesInTask"        formation="/tasks/{0:ID}/stories"                     parameters="AsanaTask"                    return="AsanaStory"         collection="true"   />
   <Function method="GET" name="GetProjectsOnATask"      formation="/tasks/{0:ID}/projects"                    parameters="AsanaTask"                    return="AsanaProject"       collection="true"   />
   <Function method="GET" name="GetTasksByTag"           formation="/tags/{0:ID}/tasks"                        parameters="AsanaTag"                     return="AsanaTask"          collection="true"   />
@@ -35,6 +36,8 @@ Copyright 2012 Antony WOods
 
   <!-- POST Functions -->                                                                                                                          
   <Function method="POST" name="CreateWorkspaceTask"    formation="/tasks"                                    parameters=""                                                                             />
+  <Function method="POST" name="CreateTaskSubtask"      formation="/tasks/{0:Parent}/subtasks"                parameters="AsanaTask"                                                                    />
+  <Function method="POST" name="SetParentTask"          formation="/tasks/{0:ID}/setParent"                   parameters="AsanaTask"                                                                    />
   <Function method="POST" name="AddProjectToTask"       formation="/tasks/{0:ID}/addProject"                  parameters="AsanaTask"                                                                    />
   <Function method="POST" name="RemoveProjectFromTask"  formation="/tasks/{0:ID}/removeProject"               parameters="AsanaTask"                                                                    />
   <Function method="POST" name="AddStoryToTask"         formation="/tasks/{0:Target}/stories"                 parameters="AsanaTask"                                                                    />
@@ -60,6 +63,7 @@ Copyright 2012 Antony WOods
   -->
   <Association type="AsanaWorkspace" create=""                          update="UpdateWorkspace"   delete="" />
   <Association type="AsanaTask"      create="CreateWorkspaceTask"       update="UpdateTask"        delete="DeleteTask" />
+  <Association type="AsanaSubtask"   create="CreateTaskSubtask"         update="UpdateTask"        delete="DeleteTask" />
   <Association type="AsanaProject"   create="CreateWorkspaceProject"    update="UpdateProject"     delete="DeleteProject" />
   <Association type="AsanaTag"       create="CreateWorkspaceTag"        update="UpdateTag"         delete="" />
   <Association type="AsanaStory"     create="AddStoryToTask"            update=""                  delete="" />

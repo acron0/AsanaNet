@@ -60,7 +60,12 @@ namespace AsanaNet
         {
             if (Saved != null)
                 Saved(this);
-        }   
+        }
+
+        public void SetAsReferenceObject()
+        {
+            SavingCallback(Parsing.Serialize(this, false, false));
+        }
      
         /// <summary>
         /// Creates a new T without requiring a public constructor
@@ -144,18 +149,46 @@ namespace AsanaNet
         }
     }
 
+    // depracated version
     public interface IAsanaObjectCollection : IList<AsanaObject>
     {
     }
 
+    // depracated version
     [Serializable]
     public class AsanaObjectCollection : List<AsanaObject>, IAsanaObjectCollection
     {
     }
 
+
+    // new version
+    public interface IAsanaObjectCollection<T> : IList<T> where T: AsanaObject
+    {
+    }
+
+    // new version
+    [Serializable]
+    public class AsanaObjectCollection<T> : List<T>, IAsanaObjectCollection<T> where T: AsanaObject
+    {
+    }
+
     static public class IAsanaObjectCollectionExtensions
     {
+        // depracated version
         static public List<Task> RefreshAll<T>(this IAsanaObjectCollection objects) where T : AsanaObject
+        {
+            List<Task> workers = new List<Task>();
+            foreach (T o in objects)
+            {
+                if (o.Host == null)
+                    throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
+                workers.Add(o.Refresh());
+            }
+            return workers;
+        }
+
+        // new version
+        static public List<Task> RefreshAll<T>(this IAsanaObjectCollection<T> objects) where T : AsanaObject
         {
             List<Task> workers = new List<Task>();
             foreach (T o in objects)
@@ -170,24 +203,24 @@ namespace AsanaNet
 
     static public class AsanaObjectExtensions
     {
-        static public Task Save(this AsanaObject obj, Asana host, AsanaFunction function)
+        static public Task<T> Save<T>(this T obj, Asana host, AsanaFunction function) where T : AsanaObject
         {
             return host.Save(obj, function);
         }
 
-        static public Task Save(this AsanaObject obj, Asana host)
+        static public Task<T> Save<T>(this T obj, Asana host) where T: AsanaObject
         {
             return host.Save(obj, null);
         }
 
-        static public Task Save(this AsanaObject obj, AsanaFunction function)
+        static public Task<T> Save<T>(this T obj, AsanaFunction function) where T : AsanaObject
         {
             if (obj.Host == null)
                 throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
             return obj.Host.Save(obj, function);
         }
 
-        static public Task Save(this AsanaObject obj)
+        static public Task<T> Save<T>(this T obj) where T : AsanaObject
         {
             if (obj.Host == null)
                 throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");

@@ -16,6 +16,9 @@ namespace AsanaNet
         [AsanaDataAttribute("is_organization")]
         public bool? IsOrganization { get; private set; }
 
+        [AsanaDataAttribute("email_domains")]
+        public string[] EmailDomains { get; private set; }
+
         // ------------------------------------------------------
 
         public bool IsObjectLocal { get { return ID == 0; } }
@@ -30,13 +33,21 @@ namespace AsanaNet
             return Create(typeof(AsanaWorkspace), ID) as AsanaWorkspace;
         }
 
-        public override Task Refresh()
+        public async override Task Refresh()
         {
+            var refresh = await Host.GetWorkspaceById(ID);
+
+            Name = refresh.Name;
+            IsOrganization = refresh.IsOrganization;
+            EmailDomains = refresh.EmailDomains;
+            /*
             return Host.GetWorkspaceById(ID, workspace =>
             {
                 Name = (workspace as AsanaWorkspace).Name;
                 IsOrganization = (workspace as AsanaWorkspace).IsOrganization;
+                EmailDomains = (workspace as AsanaWorkspace).EmailDomains;
             });
+             * */
         }
     }
 }

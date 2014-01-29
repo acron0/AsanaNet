@@ -118,7 +118,31 @@ namespace AsanaNet
 				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.<#= function.Attributes["name"].Value #>)<#=parameterStringNoType#>);
 				return request.Go((o, h) => <#=packMethodString#><<#= function.Attributes["return"].Value #>>(o, callback), ErrorCallback);
 			}
+<#
 
+			if(!isCollection)
+			{
+			#>
+			public async Task<<#= function.Attributes["return"].Value #>> <#= function.Attributes["name"].Value #>(<#= parameterStringWithType #>)
+			{
+				var uri = GetBaseUri(AsanaFunction.GetFunction(Function.<#= function.Attributes["name"].Value #>)<#=parameterStringNoType#>);
+				var response = await AsanaRequest.GoAsync(this, AsanaFunction.GetFunction(Function.<#= function.Attributes["name"].Value #>), uri);
+                return AsanaRequest.GetResponse<<#= function.Attributes["return"].Value #>>(response, this);
+			}
+			<#
+			}
+			else
+			{
+			#>
+			public async Task<AsanaObjectCollection<<#= function.Attributes["return"].Value #>>> <#= function.Attributes["name"].Value #>(<#= parameterStringWithType #>)
+			{
+				var uri = GetBaseUri(AsanaFunction.GetFunction(Function.<#= function.Attributes["name"].Value #>)<#=parameterStringNoType#>);
+                var response = await AsanaRequest.GoAsync(this, AsanaFunction.GetFunction(Function.<#= function.Attributes["name"].Value #>), uri);
+                return AsanaRequest.GetResponseCollection<<#= function.Attributes["return"].Value #>>(response, this);
+			}
+			<#
+			}
+			#>
 
 
 <#		} 
@@ -185,6 +209,60 @@ foreach (KeyValuePair<string, List<System.Xml.XmlNode>> functions in functionByP
                 throw new TypeAccessException("Unknown type for this request: " + typeof(AsanaT).Name);
 			}
 
+			public Task Get(Type AsanaT, <#=functions.Key#> callback)
+			{
+				AsanaRequest request = default(AsanaRequest);
+				<#
+				foreach(System.Xml.XmlNode function in functions.Value)
+				{
+
+					// REDUNDANT, PLEASE MAKE MORE OPTIMAL (START)
+				
+					string[] parameters = function.Attributes["parameters"].Value.Split(',');
+					string parameterStringWithType = "";
+					string parameterStringNoType = "";
+					string secondArgumentComma = "";
+					for(int i = 0; i < parameters.Length; ++i)
+					{
+						if(!string.IsNullOrWhiteSpace(parameters[i]))
+						{
+							if(i < parameters.Length-1)
+							{
+								parameterStringWithType += parameters[i] + " arg" + (i+1) + ", ";
+							}
+							else
+							{
+								parameterStringWithType += parameters[i] + " arg" + (i+1);
+							}
+							parameterStringNoType += ", arg" + (i+1);
+						}
+						if(!string.IsNullOrWhiteSpace(parameterStringWithType))
+						{
+							secondArgumentComma = ", ";
+						}
+					}
+			
+					bool isCollection = false;
+					bool.TryParse(function.Attributes["collection"].Value, out isCollection);
+					string packMethodString = isCollection ? "PackAndSendResponseCollection" : "PackAndSendResponse";
+					string responseTypeString = isCollection ? "AsanaCollectionResponseEventHandler" : "AsanaResponseEventHandler";
+
+					// REDUNDANT END
+
+				#>
+				
+				if(AsanaT == typeof(<#= function.Attributes["return"].Value #>))
+				{
+					request = GetBaseRequest(AsanaFunction.GetFunction(Function.<#= function.Attributes["name"].Value #>)<#=parameterStringNoType#>);
+					return request.Go((o, h) => <#=packMethodString#><<#= function.Attributes["return"].Value #>>(o, callback), ErrorCallback);
+				}
+
+				<#
+				}
+				#>
+				
+                throw new TypeAccessException("Unknown type for this request: " + AsanaT.Name);
+			}
 <#
 }
 #>

@@ -37,6 +37,12 @@ namespace AsanaNet
         [AsanaDataAttribute("color", SerializationFlags.Omit)] //
         public string Color { get; private set; }
 
+        [AsanaDataAttribute("public", SerializationFlags.Omit)]
+        public bool Public { get; private set; }
+
+        [AsanaDataAttribute("members", SerializationFlags.Omit)]
+        public AsanaUser[] Members { get; private set; }
+
         // ------------------------------------------------------
 
         //public bool IsObjectLocal { get { return true; } }
@@ -59,12 +65,18 @@ namespace AsanaNet
         public AsanaProject(Int64 id = 0)
         {
             ID = id;
+            // cache current state
+            SetAsReferenceObject();
+            //SavingCallback(Parsing.Serialize(this, false, true));
         }
 
         public AsanaProject(AsanaWorkspace workspace, Int64 id = 0) 
         {
             ID = id;
             Workspace = workspace;
+            // cache current state
+            SetAsReferenceObject();
+            //SavingCallback(Parsing.Serialize(this, false, true));
         }
 
         public AsanaProject(AsanaWorkspace workspace, AsanaTeam team, Int64 id = 0)
@@ -72,6 +84,8 @@ namespace AsanaNet
             ID = id;
             Workspace = workspace;
             Team = team;
+            // cache current state
+            SetAsReferenceObject();
         }
 
         public override Task Refresh()
