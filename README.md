@@ -61,4 +61,5 @@ Also, if you don't want handling anything, you can just pass an empty lambda int
 
     _asana = new Asana(_apiKey, AuthenticationType.Basic, (s1, s2, s3) => {});
 
-###Work is on-going! Please contribute!
+###Notes
+* Certain versions of Visual Studio (usually 2013 and above) don't ship with T4. If this is the case, you can install T4 via NuGet (https://www.nuget.org/packages/T4/)
