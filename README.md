@@ -1,3 +1,7 @@
+## ! This project is no longer actively maintained !
+
+---
+
 # AsanaNet
 A .NET implementation of the Asana REST API
 http://developer.asana.com/
