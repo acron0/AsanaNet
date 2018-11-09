@@ -6,6 +6,7 @@ using System.Net;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using MiniJSON;
 
 namespace AsanaNet
 {
@@ -98,6 +99,60 @@ namespace AsanaNet
                     }
             );
         }
+        
+        /// <summary>
+        /// Begins the request
+        /// </summary> <Task>
+        public async Task<TAsanaObject> GoAsync<TAsanaObject>()
+            where TAsanaObject : AsanaObject //, IAsanaData
+        {
+            if (_throttling)
+            {
+                _throttlingWaitHandle.WaitOne();
+            }
+
+            using (var response = await _request.GetResponseAsync())
+            using (var dataStream = response.GetResponseStream())
+            using (var reader = new StreamReader(dataStream))
+            {                
+                var responseFromServer = reader.ReadToEnd();
+                var result = PackAndSendResponse<TAsanaObject>(responseFromServer);
+                return result;
+            }
+
+//            Task.Factory.FromAsync<WebResponse>(
+//                _request.BeginGetResponse,
+//                _request.EndGetResponse,
+//                    null).ContinueWith(requestTask => { });
+//
+//            return Task.Factory.FromAsync<WebResponse>(
+//                _request.BeginGetResponse,
+//                _request.EndGetResponse,
+//                null).ContinueWith( (requestTask) =>
+//                {
+//                    HttpWebRequest request = (HttpWebRequest)_request;
+//                    AsanaRequest state = (AsanaRequest)requestTask.AsyncState;
+//
+//                    if (requestTask.IsFaulted)
+//                    {
+//                        _error(request.Address.AbsoluteUri, requestTask.Exception.InnerException.Message, "");
+//                        return;
+//                    }
+//                        
+//                    WebResponse result = requestTask.Result;
+//                        
+//                    if (result.Headers["Retry-After"] != null)
+//                    {
+//                        string retryAfter = result.Headers["Retry-After"];
+//                        ThrottleFor(Convert.ToInt32(retryAfter));
+//                        Go(callback, error);
+//                        return;
+//                    }
+//                    string responseContent = GetResponseContent(result);
+//                    _callback(responseContent, result.Headers);
+//                }
+//            );
+        }
 
         private string GetResponseContent(WebResponse response)
         {
@@ -106,6 +161,30 @@ namespace AsanaNet
             string output = stream.ReadToEnd();
             stream.Close();
             return output;
+        }
+        
+        /// <summary>
+        /// Packs the data and into a response object and sends it to the callback
+        /// </summary>
+        /// <typeparam name="T"></typeparam>        
+        internal T PackAndSendResponse<T>(string rawData) where T : AsanaObject
+        {
+            var u = AsanaObject.Create(typeof(T));
+//            Parsing.Deserialize(GetDataAsDict(rawData), u, this);
+            Parsing.Deserialize(GetDataAsDict(rawData), u, null);
+            return (T) u;
+        }
+        
+        /// <summary>
+        /// Converts the raw string into dictionary format
+        /// </summary>
+        /// <param name="dataString"></param>
+        /// <returns></returns>
+        private Dictionary<string, object> GetDataAsDict(string dataString)
+        {
+            var data = Json.Deserialize(dataString) as Dictionary<string, object>;
+            var data2 = data["data"] as Dictionary<string, object>;
+            return data2;
         }
     }
 }

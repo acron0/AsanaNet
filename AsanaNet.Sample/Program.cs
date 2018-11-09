@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AsanaNet.Sample
 {
@@ -8,15 +9,17 @@ namespace AsanaNet.Sample
     {
         static void Main(string[] args)
         {
+            Execute().Wait();
+        }
+
+        private static async Task Execute()
+        {
             Console.WriteLine("# Asana Sync #");
             var asana = new Asana(@"YOUR_API_TOKEN", AuthenticationType.Basic, errorCallback);
-            
-            asana.GetMe(o =>
-            {
-                var user = o as AsanaUser;
-                Console.WriteLine("Hello, " + user.Name);
-            }).Wait();
-            
+
+            var me = await asana.GetMeAsync();
+            Console.WriteLine("Hello, " + me.Name);
+
             asana.GetWorkspaces(o =>
             {
                 foreach (AsanaWorkspace workspace in o)
@@ -29,27 +32,27 @@ namespace AsanaNet.Sample
                         foreach (AsanaProject project in projects)
                             asanaProjects.Add(project);
                     }).Wait();
-                    
+
                     var projectTarefas = asanaProjects.FirstOrDefault(p =>
                         p.Name.Equals("Tarefas", StringComparison.InvariantCultureIgnoreCase));
 
                     // Times
                     asana.GetTeamsInWorkspace(workspace, teams =>
-                    {                                               
+                    {
                         foreach (AsanaTeam team in teams)
                         {
                             if (team.Name != "Meio Homologado")
                                 continue;
-                            
+
                             Console.WriteLine("  Team: " + team.Name);
-                            
+
                             // Projetos
                             asana.GetProjectsInTeam(team, projects =>
                             {
                                 foreach (AsanaProject project in projects)
                                 {
                                     Console.WriteLine("    Project: " + project.Name);
-                                    
+
                                     asana.GetTasksInAProject(project, tasks =>
                                     {
                                         foreach (AsanaTask task in tasks)
@@ -59,13 +62,12 @@ namespace AsanaNet.Sample
                                     }).Wait();
                                 }
                             }).Wait();
-                        }                        
+                        }
                     }).Wait();
-
                 }
             }).Wait();
-                       
-            
+
+
             Console.WriteLine();
             Console.WriteLine("Fim");
             Console.ReadLine();
