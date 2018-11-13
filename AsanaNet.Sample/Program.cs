@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace AsanaNet.Sample
 {
@@ -11,11 +13,14 @@ namespace AsanaNet.Sample
         {
             Execute().Wait();
         }
-
+        
         private static async Task Execute()
         {
+            // CONFIGURE YOUR ASANA API TOKEN IN APPSETTINGS.CONFIG FILE
+            
             Console.WriteLine("# Asana Sync #");
-            var asana = new Asana(@"YOUR_API_TOKEN", AuthenticationType.Basic, errorCallback);
+            var apiToken = GetApiToken();
+            var asana = new Asana(apiToken, AuthenticationType.Basic, errorCallback);
 
             var me = await asana.GetMeAsync();
             Console.WriteLine("Hello, " + me.Name);
@@ -75,6 +80,15 @@ namespace AsanaNet.Sample
 
         private static void errorCallback(string arg1, string arg2, string arg3)
         {            
+        }
+        
+        private static string GetApiToken()
+        {
+            var configs = new Microsoft.Extensions.Configuration.ConfigurationBuilder()                
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+            return configs.GetSection("ApiToken").Value;
         }
     }
 }
