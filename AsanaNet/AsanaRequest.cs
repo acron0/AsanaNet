@@ -98,6 +98,15 @@ namespace AsanaNet
                         _callback(responseContent, result.Headers);
                     }
             );
+        }               
+
+        private string GetResponseContent(WebResponse response)
+        {
+            Encoding enc = Encoding.GetEncoding(65001);
+            var stream = new StreamReader(response.GetResponseStream(), enc);
+            string output = stream.ReadToEnd();
+            stream.Close();
+            return output;
         }
         
         /// <summary>
@@ -119,48 +128,27 @@ namespace AsanaNet
                 var result = PackAndSendResponse<TAsanaObject>(responseFromServer);
                 return result;
             }
-
-//            Task.Factory.FromAsync<WebResponse>(
-//                _request.BeginGetResponse,
-//                _request.EndGetResponse,
-//                    null).ContinueWith(requestTask => { });
-//
-//            return Task.Factory.FromAsync<WebResponse>(
-//                _request.BeginGetResponse,
-//                _request.EndGetResponse,
-//                null).ContinueWith( (requestTask) =>
-//                {
-//                    HttpWebRequest request = (HttpWebRequest)_request;
-//                    AsanaRequest state = (AsanaRequest)requestTask.AsyncState;
-//
-//                    if (requestTask.IsFaulted)
-//                    {
-//                        _error(request.Address.AbsoluteUri, requestTask.Exception.InnerException.Message, "");
-//                        return;
-//                    }
-//                        
-//                    WebResponse result = requestTask.Result;
-//                        
-//                    if (result.Headers["Retry-After"] != null)
-//                    {
-//                        string retryAfter = result.Headers["Retry-After"];
-//                        ThrottleFor(Convert.ToInt32(retryAfter));
-//                        Go(callback, error);
-//                        return;
-//                    }
-//                    string responseContent = GetResponseContent(result);
-//                    _callback(responseContent, result.Headers);
-//                }
-//            );
         }
-
-        private string GetResponseContent(WebResponse response)
+        
+        /// <summary>
+        /// Begins the request
+        /// </summary> <Task>
+        public async Task<IAsanaObjectCollection<TAsanaObject>> GoCollectionAsync<TAsanaObject>()
+            where TAsanaObject : AsanaObject //, IAsanaData
         {
-            Encoding enc = Encoding.GetEncoding(65001);
-            var stream = new StreamReader(response.GetResponseStream(), enc);
-            string output = stream.ReadToEnd();
-            stream.Close();
-            return output;
+            if (_throttling)
+            {
+                _throttlingWaitHandle.WaitOne();
+            }
+
+            using (var response = await _request.GetResponseAsync())
+            using (var dataStream = response.GetResponseStream())
+            using (var reader = new StreamReader(dataStream))
+            {                
+                var responseFromServer = reader.ReadToEnd();
+                var result = PackAndSendResponseCollection<TAsanaObject>(responseFromServer);
+                return result;
+            }
         }
         
         /// <summary>
@@ -170,10 +158,9 @@ namespace AsanaNet
         internal T PackAndSendResponse<T>(string rawData) where T : AsanaObject
         {
             var u = AsanaObject.Create(typeof(T));
-//            Parsing.Deserialize(GetDataAsDict(rawData), u, this);
             Parsing.Deserialize(GetDataAsDict(rawData), u, null);
             return (T) u;
-        }
+        }               
         
         /// <summary>
         /// Converts the raw string into dictionary format
@@ -185,6 +172,40 @@ namespace AsanaNet
             var data = Json.Deserialize(dataString) as Dictionary<string, object>;
             var data2 = data["data"] as Dictionary<string, object>;
             return data2;
+        }
+        
+        /// <summary>
+        /// Packs the data and into a collection object and sends it to the callback
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="callback"></param>
+        internal IAsanaObjectCollection<T> PackAndSendResponseCollection<T>(string rawData) where T : AsanaObject
+        {
+            var k = GetDataAsDictArray(rawData);
+            AsanaObjectCollection<T> collection = new AsanaObjectCollection<T>();
+            foreach (var j in k)
+            {
+                var t = (T) AsanaObject.Create(typeof(T));
+                Parsing.Deserialize(j, t, null);
+                collection.Add(t);
+            }
+
+            return collection;            
+        }
+        
+        /// <summary>
+        /// Converts the raw string into list of dictionaries format
+        /// </summary>
+        /// <param name="dataString"></param>
+        /// <returns></returns>
+        private Dictionary<string, object>[] GetDataAsDictArray(string dataString)
+        {
+            var data = Json.Deserialize(dataString) as Dictionary<string, object>;
+            var data2 = data["data"] as List<object>;
+            var data3 = new Dictionary<string, object>[data2.Count];
+            for (int i = 0; i < data2.Count; ++i)
+                data3[i] = data2[i] as Dictionary<string, object>;
+            return data3;
         }
     }
 }

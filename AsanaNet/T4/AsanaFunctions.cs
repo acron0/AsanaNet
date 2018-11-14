@@ -53,29 +53,35 @@ namespace AsanaNet
 				return request.Go((o, h) => PackAndSendResponseCollection<AsanaUser>(o, callback), ErrorCallback);
 			}
 
-
+            public Task<IAsanaObjectCollection<AsanaUser>> GetUsersAsync()
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetUsers));
+                return request.GoCollectionAsync<AsanaUser>();
+            }
 
 			public Task GetMe(AsanaResponseEventHandler callback)
 			{
 				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetMe));
 				return request.Go((o, h) => PackAndSendResponse<AsanaUser>(o, callback), ErrorCallback);
 			}
-			
-			public Task<AsanaUser> GetMeAsync()
+
+            public Task<AsanaUser> GetMeAsync()
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetMe));
+                return request.GoAsync<AsanaUser>();
+            }
+
+			public Task GetUserById(Int64 int64, AsanaResponseEventHandler callback)
 			{
-				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetMe));
-				return request.GoAsync<AsanaUser>();				
-			}
-
-
-
-			public Task GetUserById(Int64 arg1, AsanaResponseEventHandler callback)
-			{
-				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetUserById), arg1);
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetUserById), int64);
 				return request.Go((o, h) => PackAndSendResponse<AsanaUser>(o, callback), ErrorCallback);
 			}
 
-
+            public Task<AsanaUser> GetUserByIdAsync(Int64 int64)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetUserById), int64);
+                return request.GoAsync<AsanaUser>();
+            }
 
 			public Task GetWorkspaces(AsanaCollectionResponseEventHandler callback)
 			{
@@ -83,127 +89,191 @@ namespace AsanaNet
 				return request.Go((o, h) => PackAndSendResponseCollection<AsanaWorkspace>(o, callback), ErrorCallback);
 			}
 
+            public Task<IAsanaObjectCollection<AsanaWorkspace>> GetWorkspacesAsync()
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetWorkspaces));
+                return request.GoCollectionAsync<AsanaWorkspace>();
+            }
 
-
-			public Task GetWorkspaceById(Int64 arg1, AsanaResponseEventHandler callback)
+			public Task GetWorkspaceById(Int64 int64, AsanaResponseEventHandler callback)
 			{
-				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetWorkspaceById), arg1);
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetWorkspaceById), int64);
 				return request.Go((o, h) => PackAndSendResponse<AsanaWorkspace>(o, callback), ErrorCallback);
 			}
 
+            public Task<AsanaWorkspace> GetWorkspaceByIdAsync(Int64 int64)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetWorkspaceById), int64);
+                return request.GoAsync<AsanaWorkspace>();
+            }
 
-
-			public Task GetUsersInWorkspace(AsanaWorkspace arg1, AsanaCollectionResponseEventHandler callback)
+			public Task GetUsersInWorkspace(AsanaWorkspace asanaWorkspace, AsanaCollectionResponseEventHandler callback)
 			{
-				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetUsersInWorkspace), arg1);
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetUsersInWorkspace), asanaWorkspace);
 				return request.Go((o, h) => PackAndSendResponseCollection<AsanaUser>(o, callback), ErrorCallback);
 			}
 
+            public Task<IAsanaObjectCollection<AsanaUser>> GetUsersInWorkspaceAsync(AsanaWorkspace asanaWorkspace)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetUsersInWorkspace), asanaWorkspace);
+                return request.GoCollectionAsync<AsanaUser>();
+            }
 
-
-			public Task GetTasksInWorkspace(AsanaWorkspace arg1,  AsanaUser arg2, AsanaCollectionResponseEventHandler callback)
+			public Task GetTasksInWorkspace(AsanaWorkspace asanaWorkspace, AsanaUser asanaUser, AsanaCollectionResponseEventHandler callback)
 			{
-				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTasksInWorkspace), arg1, arg2);
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTasksInWorkspace), asanaWorkspace, asanaUser);
 				return request.Go((o, h) => PackAndSendResponseCollection<AsanaTask>(o, callback), ErrorCallback);
 			}
 
+            public Task<IAsanaObjectCollection<AsanaTask>> GetTasksInWorkspaceAsync(AsanaWorkspace asanaWorkspace, AsanaUser asanaUser)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTasksInWorkspace), asanaWorkspace, asanaUser);
+                return request.GoCollectionAsync<AsanaTask>();
+            }
 
-
-			public Task GetProjectsInWorkspace(AsanaWorkspace arg1, AsanaCollectionResponseEventHandler callback)
+			public Task GetProjectsInWorkspace(AsanaWorkspace asanaWorkspace, AsanaCollectionResponseEventHandler callback)
 			{
-				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetProjectsInWorkspace), arg1);
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetProjectsInWorkspace), asanaWorkspace);
 				return request.Go((o, h) => PackAndSendResponseCollection<AsanaProject>(o, callback), ErrorCallback);
 			}
 
+            public Task<IAsanaObjectCollection<AsanaProject>> GetProjectsInWorkspaceAsync(AsanaWorkspace asanaWorkspace)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetProjectsInWorkspace), asanaWorkspace);
+                return request.GoCollectionAsync<AsanaProject>();
+            }
 
-
-			public Task GetTagsInWorkspace(AsanaWorkspace arg1, AsanaCollectionResponseEventHandler callback)
+			public Task GetTagsInWorkspace(AsanaWorkspace asanaWorkspace, AsanaCollectionResponseEventHandler callback)
 			{
-				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTagsInWorkspace), arg1);
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTagsInWorkspace), asanaWorkspace);
 				return request.Go((o, h) => PackAndSendResponseCollection<AsanaTag>(o, callback), ErrorCallback);
 			}
 
+            public Task<IAsanaObjectCollection<AsanaTag>> GetTagsInWorkspaceAsync(AsanaWorkspace asanaWorkspace)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTagsInWorkspace), asanaWorkspace);
+                return request.GoCollectionAsync<AsanaTag>();
+            }
 
-
-			public Task GetTaskById(Int64 arg1, AsanaResponseEventHandler callback)
+			public Task GetTaskById(Int64 int64, AsanaResponseEventHandler callback)
 			{
-				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTaskById), arg1);
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTaskById), int64);
 				return request.Go((o, h) => PackAndSendResponse<AsanaTask>(o, callback), ErrorCallback);
 			}
 
+            public Task<AsanaTask> GetTaskByIdAsync(Int64 int64)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTaskById), int64);
+                return request.GoAsync<AsanaTask>();
+            }
 
-
-			public Task GetStoriesInTask(AsanaTask arg1, AsanaCollectionResponseEventHandler callback)
+			public Task GetStoriesInTask(AsanaTask asanaTask, AsanaCollectionResponseEventHandler callback)
 			{
-				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetStoriesInTask), arg1);
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetStoriesInTask), asanaTask);
 				return request.Go((o, h) => PackAndSendResponseCollection<AsanaStory>(o, callback), ErrorCallback);
 			}
 
+            public Task<IAsanaObjectCollection<AsanaStory>> GetStoriesInTaskAsync(AsanaTask asanaTask)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetStoriesInTask), asanaTask);
+                return request.GoCollectionAsync<AsanaStory>();
+            }
 
-
-			public Task GetProjectsOnATask(AsanaTask arg1, AsanaCollectionResponseEventHandler callback)
+			public Task GetProjectsOnATask(AsanaTask asanaTask, AsanaCollectionResponseEventHandler callback)
 			{
-				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetProjectsOnATask), arg1);
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetProjectsOnATask), asanaTask);
 				return request.Go((o, h) => PackAndSendResponseCollection<AsanaProject>(o, callback), ErrorCallback);
 			}
 
+            public Task<IAsanaObjectCollection<AsanaProject>> GetProjectsOnATaskAsync(AsanaTask asanaTask)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetProjectsOnATask), asanaTask);
+                return request.GoCollectionAsync<AsanaProject>();
+            }
 
-
-			public Task GetTasksByTag(AsanaTag arg1, AsanaCollectionResponseEventHandler callback)
+			public Task GetTasksByTag(AsanaTag asanaTag, AsanaCollectionResponseEventHandler callback)
 			{
-				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTasksByTag), arg1);
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTasksByTag), asanaTag);
 				return request.Go((o, h) => PackAndSendResponseCollection<AsanaTask>(o, callback), ErrorCallback);
 			}
 
+            public Task<IAsanaObjectCollection<AsanaTask>> GetTasksByTagAsync(AsanaTag asanaTag)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTasksByTag), asanaTag);
+                return request.GoCollectionAsync<AsanaTask>();
+            }
 
-
-			public Task GetStoryById(Int64 arg1, AsanaResponseEventHandler callback)
+			public Task GetStoryById(Int64 int64, AsanaResponseEventHandler callback)
 			{
-				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetStoryById), arg1);
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetStoryById), int64);
 				return request.Go((o, h) => PackAndSendResponse<AsanaStory>(o, callback), ErrorCallback);
 			}
 
+            public Task<AsanaStory> GetStoryByIdAsync(Int64 int64)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetStoryById), int64);
+                return request.GoAsync<AsanaStory>();
+            }
 
-
-			public Task GetProjectById(Int64 arg1, AsanaResponseEventHandler callback)
+			public Task GetProjectById(Int64 int64, AsanaResponseEventHandler callback)
 			{
-				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetProjectById), arg1);
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetProjectById), int64);
 				return request.Go((o, h) => PackAndSendResponse<AsanaProject>(o, callback), ErrorCallback);
 			}
 
+            public Task<AsanaProject> GetProjectByIdAsync(Int64 int64)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetProjectById), int64);
+                return request.GoAsync<AsanaProject>();
+            }
 
-
-			public Task GetTasksInAProject(AsanaProject arg1, AsanaCollectionResponseEventHandler callback)
+			public Task GetTasksInAProject(AsanaProject asanaProject, AsanaCollectionResponseEventHandler callback)
 			{
-				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTasksInAProject), arg1);
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTasksInAProject), asanaProject);
 				return request.Go((o, h) => PackAndSendResponseCollection<AsanaTask>(o, callback), ErrorCallback);
 			}
 
+            public Task<IAsanaObjectCollection<AsanaTask>> GetTasksInAProjectAsync(AsanaProject asanaProject)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTasksInAProject), asanaProject);
+                return request.GoCollectionAsync<AsanaTask>();
+            }
 
-
-			public Task GetTagById(Int64 arg1, AsanaResponseEventHandler callback)
+			public Task GetTagById(Int64 int64, AsanaResponseEventHandler callback)
 			{
-				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTagById), arg1);
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTagById), int64);
 				return request.Go((o, h) => PackAndSendResponse<AsanaTag>(o, callback), ErrorCallback);
 			}
 
+            public Task<AsanaTag> GetTagByIdAsync(Int64 int64)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTagById), int64);
+                return request.GoAsync<AsanaTag>();
+            }
 
-
-			public Task GetTeamsInWorkspace(AsanaWorkspace arg1, AsanaCollectionResponseEventHandler callback)
+			public Task GetTeamsInWorkspace(AsanaWorkspace asanaWorkspace, AsanaCollectionResponseEventHandler callback)
 			{
-				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTeamsInWorkspace), arg1);
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTeamsInWorkspace), asanaWorkspace);
 				return request.Go((o, h) => PackAndSendResponseCollection<AsanaTeam>(o, callback), ErrorCallback);
 			}
 
+            public Task<IAsanaObjectCollection<AsanaTeam>> GetTeamsInWorkspaceAsync(AsanaWorkspace asanaWorkspace)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTeamsInWorkspace), asanaWorkspace);
+                return request.GoCollectionAsync<AsanaTeam>();
+            }
 
-
-			public Task GetProjectsInTeam(AsanaTeam arg1, AsanaCollectionResponseEventHandler callback)
+			public Task GetProjectsInTeam(AsanaTeam asanaTeam, AsanaCollectionResponseEventHandler callback)
 			{
-				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetProjectsInTeam), arg1);
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetProjectsInTeam), asanaTeam);
 				return request.Go((o, h) => PackAndSendResponseCollection<AsanaProject>(o, callback), ErrorCallback);
 			}
 
-
+            public Task<IAsanaObjectCollection<AsanaProject>> GetProjectsInTeamAsync(AsanaTeam asanaTeam)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetProjectsInTeam), asanaTeam);
+                return request.GoCollectionAsync<AsanaProject>();
+            }
 
 
 
