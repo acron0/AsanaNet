@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsanaNet", "AsanaNet\AsanaNet.csproj", "{3740ED7E-52B6-4D40-92CD-DF0FF0E855E2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsanaNet.Sample", "AsanaNet.Sample\AsanaNet.Sample.csproj", "{C7DB452E-A5F5-4171-B95E-CBBB8A70EA72}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,18 @@ Global
 		{3740ED7E-52B6-4D40-92CD-DF0FF0E855E2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{3740ED7E-52B6-4D40-92CD-DF0FF0E855E2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{3740ED7E-52B6-4D40-92CD-DF0FF0E855E2}.Release|x86.ActiveCfg = Release|Any CPU
+		{C7DB452E-A5F5-4171-B95E-CBBB8A70EA72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7DB452E-A5F5-4171-B95E-CBBB8A70EA72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7DB452E-A5F5-4171-B95E-CBBB8A70EA72}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{C7DB452E-A5F5-4171-B95E-CBBB8A70EA72}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{C7DB452E-A5F5-4171-B95E-CBBB8A70EA72}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C7DB452E-A5F5-4171-B95E-CBBB8A70EA72}.Debug|x86.Build.0 = Debug|Any CPU
+		{C7DB452E-A5F5-4171-B95E-CBBB8A70EA72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7DB452E-A5F5-4171-B95E-CBBB8A70EA72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7DB452E-A5F5-4171-B95E-CBBB8A70EA72}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C7DB452E-A5F5-4171-B95E-CBBB8A70EA72}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{C7DB452E-A5F5-4171-B95E-CBBB8A70EA72}.Release|x86.ActiveCfg = Release|Any CPU
+		{C7DB452E-A5F5-4171-B95E-CBBB8A70EA72}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

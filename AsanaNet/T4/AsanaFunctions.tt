@@ -1,10 +1,12 @@
-﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
 <#@ output extension=".cs" #>
 <#@ assembly name="System.Xml" #>
 <#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
 <#
- System.Xml.XmlDocument configurationData = new System.Xml.XmlDocument();
- configurationData.Load(@"AsanaNet/T4/AsanaFunctionDefinitions.xml");
+ System.Xml.XmlDocument configurationData = new System.Xml.XmlDocument(); 
+ configurationData.Load(this.Host.ResolvePath("AsanaFunctionDefinitions.xml"));
  System.Xml.XmlNodeList functionList = configurationData.GetElementsByTagName("Function");
  System.Xml.XmlNodeList associationList = configurationData.GetElementsByTagName("Association");
  
