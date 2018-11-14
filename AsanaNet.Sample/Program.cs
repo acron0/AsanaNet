@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
@@ -11,7 +12,8 @@ namespace AsanaNet.Sample
     {
         static void Main(string[] args)
         {
-            ExecuteAsync().Wait();
+            ExecuteParallelAsync().Wait();
+//            ExecuteAsync().Wait();
 //            ExecuteWithTasks();
         }
         
@@ -38,11 +40,11 @@ namespace AsanaNet.Sample
                 var teams = await asana.GetTeamsInWorkspaceAsync(workspace);                
                 foreach (var team in teams)
                 {
-                    if (team.Name != "Meio Homologado")
-                        continue;
+//                    if (team.Name != "Projetos Especiais")
+//                        continue;
 
                     Console.WriteLine("  Team: " + team.Name);
-
+                    
                     // Projects
                     var projects = await asana.GetProjectsInTeamAsync(team);                    
                     foreach (AsanaProject project in projects)
@@ -61,6 +63,91 @@ namespace AsanaNet.Sample
             Console.WriteLine("Execution time " + (DateTime.Now - startTime));
             Console.ReadLine();
         }
+        
+        /// <summary>
+        /// New API format - Parallel execution
+        /// </summary>
+        /// <returns></returns>
+        private static async Task ExecuteParallelAsync()
+        {                        
+            // CONFIGURE YOUR ASANA API TOKEN IN APPSETTINGS.CONFIG FILE
+            var startTime = DateTime.Now;
+            Console.WriteLine("# Asana - Async Method #");
+            var apiToken = GetApiToken();
+            var asana = new Asana(apiToken, AuthenticationType.Basic, errorCallback);
+
+            // Parallel tasks
+            var meTask = asana.GetMeAsync();
+            
+            var workspaces = await asana.GetWorkspacesAsync();
+//            var workspacesConcurrentList = new ConcurrentQueue<AsanaWorkspace>(workspaces);
+            var workspaceTasks = workspaces.Select(async workspace =>
+            {
+                var workSpaceInfo = new HierarchicalParallelExecutionData
+                {
+                    Info = "Workspace: " + workspace.Name,
+                    Object = workspace
+                };
+                
+                // Teams
+                var teams = await asana.GetTeamsInWorkspaceAsync(workspace);
+//                var teamsConcurrentList = new ConcurrentQueue<AsanaTeam>(teams);
+                var teamTasks = teams.Select(async team =>
+                {
+//                    if (team.Name != "Projetos Especiais")
+//                        return;
+                    
+                    var teamInfo = new HierarchicalParallelExecutionData
+                    {
+                        Info = "  Team: " + team.Name,
+                        Object = team
+                    };
+                    workSpaceInfo.Items.Add(teamInfo);
+                    
+                    // Projects
+                    var projects = await asana.GetProjectsInTeamAsync(team);
+//                    var projectsConcurrentList = new ConcurrentQueue<AsanaProject>(projects);
+                    var projectTasks = projects.Select(async project =>
+                    {
+                        var projectInfo = new HierarchicalParallelExecutionData
+                        {
+                            Info = "    Project: " + project.Name,
+                            Object = team
+                        };
+                        teamInfo.Items.Add(projectInfo);
+                        
+                        // Taks
+                        var tasks = await asana.GetTasksInAProjectAsync(project);                        
+                        foreach (var task in tasks)
+                        {
+                            var taskInfo = new HierarchicalParallelExecutionData
+                            {
+                                Info = "      Task: " + task.Name,
+                                Object = team
+                            };
+                            projectInfo.Items.Add(taskInfo);
+                        }                        
+
+                    });                    
+                    await Task.WhenAll(projectTasks);
+                });
+                await Task.WhenAll(teamTasks);
+                
+                return workSpaceInfo;
+            });
+            var hierarchicalCall = await Task.WhenAll(workspaceTasks);                        
+            
+            var me = meTask.Result;
+            Console.WriteLine("Hello, " + me.Name);
+
+            foreach (var item in hierarchicalCall)
+                item.WriteToConsole();
+           
+            Console.WriteLine();
+            Console.WriteLine("Execution time " + (DateTime.Now - startTime));
+            Console.ReadLine();
+        }
+        
         
         /// <summary>
         /// Old API format
@@ -91,8 +178,8 @@ namespace AsanaNet.Sample
                     {
                         foreach (AsanaTeam team in teams)
                         {
-                            if (team.Name != "Meio Homologado")
-                                continue;
+//                            if (team.Name != "Projetos Especiais")
+//                                continue;
 
                             Console.WriteLine("  Team: " + team.Name);
 
