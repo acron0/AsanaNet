@@ -16,9 +16,37 @@ namespace AsanaNet
     internal class AsanaRequest
     {
         /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="host"></param>
+        public AsanaRequest(HttpWebRequest request, Asana host)
+        {
+            _request = request;
+            _host = host;
+        }
+        
+        #region Static variables
+        
+        /// <summary>
+        /// Static because all Asana requests will have a common throttle
+        /// </summary>
+        private static bool _throttling = false;
+        private static ManualResetEvent _throttlingWaitHandle = new ManualResetEvent(false); 
+        
+        #endregion
+        
+        #region Variables
+        
+        /// <summary>
         /// Contains the actual request object
         /// </summary>
-        private HttpWebRequest _request;
+        private readonly HttpWebRequest _request;
+
+        /// <summary>
+        /// Link with the instance owner of the request
+        /// </summary>
+        private readonly Asana _host;
 
         /// <summary>
         /// The callback once the response is received.
@@ -30,34 +58,10 @@ namespace AsanaNet
         /// </summary>
         private Action<string, string, string> _error;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="request"></param>
-        public AsanaRequest(HttpWebRequest request)
-        {
-            _request = request;
-        }
-
-        /// <summary>
-        /// Static because all Asana requests will have a common throttle
-        /// </summary>
-        private static bool _throttling = false;
-        private static ManualResetEvent _throttlingWaitHandle = new ManualResetEvent(false); 
-
-        private static void ThrottleFor(int seconds)
-        {
-            _throttling = true;
-            Timer timer = null;
-            timer = new Timer(s =>
-                {
-                    _throttling = false;
-                    _throttlingWaitHandle.Set();
-                    _throttlingWaitHandle = new ManualResetEvent(false);
-                    timer.Dispose();
-                }, null, 1000 * seconds, Timeout.Infinite);
-        }
-
+        #endregion
+                     
+        #region Task communication pattern
+        
         /// <summary>
         /// Begins the request
         /// </summary> <Task>
@@ -66,10 +70,8 @@ namespace AsanaNet
             _callback = callback;
             _error = error;
 
-            if (_throttling)
-            {
+            if (_throttling)            
                 _throttlingWaitHandle.WaitOne();
-            }
 
             return Task.Factory.FromAsync<WebResponse>(
                     _request.BeginGetResponse,
@@ -100,7 +102,7 @@ namespace AsanaNet
             );
         }               
 
-        private string GetResponseContent(WebResponse response)
+        private static string GetResponseContent(WebResponse response)
         {
             Encoding enc = Encoding.GetEncoding(65001);
             var stream = new StreamReader(response.GetResponseStream(), enc);
@@ -109,24 +111,35 @@ namespace AsanaNet
             return output;
         }
         
+        #endregion
+        
+        #region Async/Await communication pattern
+        
         /// <summary>
         /// Begins the request
         /// </summary> <Task>
         public async Task<TAsanaObject> GoAsync<TAsanaObject>()
-            where TAsanaObject : AsanaObject //, IAsanaData
+            where TAsanaObject : AsanaObject
         {
             if (_throttling)
-            {
                 _throttlingWaitHandle.WaitOne();
-            }
 
             using (var response = await _request.GetResponseAsync())
-            using (var dataStream = response.GetResponseStream())
-            using (var reader = new StreamReader(dataStream))
-            {                
-                var responseFromServer = reader.ReadToEnd();
-                var result = PackAndSendResponse<TAsanaObject>(responseFromServer);
-                return result;
+            {
+                if (response.Headers["Retry-After"] != null)
+                {
+                    var retryAfter = response.Headers["Retry-After"];
+                    ThrottleFor(Convert.ToInt32(retryAfter));
+                    return await GoAsync<TAsanaObject>();
+                }
+                
+                using (var dataStream = response.GetResponseStream())
+                using (var reader = new StreamReader(dataStream))
+                {
+                    var responseFromServer = reader.ReadToEnd();
+                    var result = PackAndSendResponse<TAsanaObject>(responseFromServer);
+                    return result;
+                }
             }
         }
         
@@ -134,31 +147,40 @@ namespace AsanaNet
         /// Begins the request
         /// </summary> <Task>
         public async Task<IAsanaObjectCollection<TAsanaObject>> GoCollectionAsync<TAsanaObject>()
-            where TAsanaObject : AsanaObject //, IAsanaData
+            where TAsanaObject : AsanaObject
         {
-            if (_throttling)
-            {
+            if (_throttling)            
                 _throttlingWaitHandle.WaitOne();
-            }
 
             using (var response = await _request.GetResponseAsync())
-            using (var dataStream = response.GetResponseStream())
-            using (var reader = new StreamReader(dataStream))
-            {                
-                var responseFromServer = reader.ReadToEnd();
-                var result = PackAndSendResponseCollection<TAsanaObject>(responseFromServer);
-                return result;
+            {
+                if (response.Headers["Retry-After"] != null)
+                {
+                    var retryAfter = response.Headers["Retry-After"];
+                    ThrottleFor(Convert.ToInt32(retryAfter));
+                    return await GoCollectionAsync<TAsanaObject>();
+                }
+                
+                using (var dataStream = response.GetResponseStream())
+                using (var reader = new StreamReader(dataStream))
+                {
+                    var responseFromServer = reader.ReadToEnd();
+                    var result = PackAndSendResponseCollection<TAsanaObject>(responseFromServer);
+                    return result;
+                }
             }
         }
+                
+        #region Json deserealize utils
         
         /// <summary>
         /// Packs the data and into a response object and sends it to the callback
         /// </summary>
         /// <typeparam name="T"></typeparam>        
-        internal T PackAndSendResponse<T>(string rawData) where T : AsanaObject
+        private T PackAndSendResponse<T>(string rawData) where T : AsanaObject
         {
             var u = AsanaObject.Create(typeof(T));
-            Parsing.Deserialize(GetDataAsDict(rawData), u, null);
+            Parsing.Deserialize(GetDataAsDict(rawData), u, _host);
             return (T) u;
         }               
         
@@ -167,26 +189,25 @@ namespace AsanaNet
         /// </summary>
         /// <param name="dataString"></param>
         /// <returns></returns>
-        private Dictionary<string, object> GetDataAsDict(string dataString)
-        {
+        private static Dictionary<string, object> GetDataAsDict(string dataString)
+        {            
             var data = Json.Deserialize(dataString) as Dictionary<string, object>;
             var data2 = data["data"] as Dictionary<string, object>;
             return data2;
         }
-        
+
         /// <summary>
         /// Packs the data and into a collection object and sends it to the callback
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="callback"></param>
-        internal IAsanaObjectCollection<T> PackAndSendResponseCollection<T>(string rawData) where T : AsanaObject
+        private IAsanaObjectCollection<T> PackAndSendResponseCollection<T>(string rawData) where T : AsanaObject
         {
             var k = GetDataAsDictArray(rawData);
             AsanaObjectCollection<T> collection = new AsanaObjectCollection<T>();
             foreach (var j in k)
             {
                 var t = (T) AsanaObject.Create(typeof(T));
-                Parsing.Deserialize(j, t, null);
+                Parsing.Deserialize(j, t, _host);
                 collection.Add(t);
             }
 
@@ -198,7 +219,7 @@ namespace AsanaNet
         /// </summary>
         /// <param name="dataString"></param>
         /// <returns></returns>
-        private Dictionary<string, object>[] GetDataAsDictArray(string dataString)
+        private static Dictionary<string, object>[] GetDataAsDictArray(string dataString)
         {
             var data = Json.Deserialize(dataString) as Dictionary<string, object>;
             var data2 = data["data"] as List<object>;
@@ -207,5 +228,26 @@ namespace AsanaNet
                 data3[i] = data2[i] as Dictionary<string, object>;
             return data3;
         }
+        
+        #endregion
+        
+        #endregion
+        
+        #region Methods
+        
+        private static void ThrottleFor(int seconds)
+        {
+            _throttling = true;
+            Timer timer = null;
+            timer = new Timer(s =>
+                {
+                    _throttling = false;
+                    _throttlingWaitHandle.Set();
+                    _throttlingWaitHandle = new ManualResetEvent(false);
+                    timer.Dispose();
+                }, null, 1000 * seconds, Timeout.Infinite);
+        }
+        
+        #endregion
     }
 }

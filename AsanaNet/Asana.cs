@@ -102,7 +102,7 @@ namespace AsanaNet
 				request.Headers["Authorization"] = "Bearer " + OAuthToken;
             request.Method = function.Method;
             request.UserAgent = "AsanaNet (github.com/acron0/AsanaNet)";
-            return new AsanaRequest(request);
+            return new AsanaRequest(request, this);
         }
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace AsanaNet
             request.ContentType = "application/x-www-form-urlencoded";
             request.ContentLength = 0;
 
-            return new AsanaRequest(request);
+            return new AsanaRequest(request, this);
         }
 
         /// <summary>

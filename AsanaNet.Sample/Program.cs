@@ -12,6 +12,7 @@ namespace AsanaNet.Sample
     {
         static void Main(string[] args)
         {
+            // Third example of how to perform
             ExecuteParallelAsync().Wait();
 //            ExecuteAsync().Wait();
 //            ExecuteWithTasks();
