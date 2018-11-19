@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
@@ -11,13 +13,46 @@ namespace AsanaNet.Sample
     class Program
     {
         static void Main(string[] args)
-        {
+        {            
             // Third example of how to perform
-            ExecuteParallelAsync().Wait();
+//            ExecuteParallelAsync().Wait();
 //            ExecuteAsync().Wait();
-//            ExecuteWithTasks();
+//            ExecuteWithTasks();         
+            MonitorProjectChanges(733775454290030, TimeSpan.FromSeconds(5)).Wait();
         }
-        
+
+        private static async Task MonitorProjectChanges(long projectId, TimeSpan interval)
+        {
+            var apiToken = GetApiToken();
+            var asana = new Asana(apiToken, AuthenticationType.Basic, errorCallback);
+            
+            //var project = await asana.GetProjectByIdAsync(projectId);
+            //var events = await asana.GetEventsInAProjectAsync(project, "8233e364b4a1a439d0ace299e825a47b:2");
+
+            var lastToken = string.Empty;
+            while (true)
+            {
+                var events = await asana.GetEventsInAProjectAsync(projectId, lastToken);                               
+                lastToken = events.Sync;
+                if (events.Data != null)
+                    foreach (var item in events.Data)
+                    {
+                        Console.WriteLine($"{item.CreatedAt} - {item.Type}: {item.Action}");
+                        if (item.Resource != null)
+                        {
+                            var line1 =
+                                $"    {item.Resource.CreatedAt} - {item.Resource.Name} - {item.Resource.CreatedBy?.Name}";
+                            var line2 = $"    {item.Resource.Type} - {item.Resource.Text}";
+                            if (line1.Trim().Length > 2)
+                                Console.WriteLine(line1);
+                            if (line2.Trim().Length > 1)
+                                Console.WriteLine(line2);
+                        }
+                    }
+                Thread.Sleep(interval);
+            }            
+        }
+
         /// <summary>
         /// New API format
         /// </summary>

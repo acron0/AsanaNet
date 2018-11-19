@@ -28,6 +28,8 @@ namespace AsanaNet
 			GetTagById,
 			GetTeamsInWorkspace,
 			GetProjectsInTeam,
+			GetEventsInAProject,
+			GetEventsInTask,
 			CreateWorkspaceTask,
 			AddProjectToTask,
 			RemoveProjectFromTask,
@@ -275,6 +277,30 @@ namespace AsanaNet
                 return request.GoCollectionAsync<AsanaProject>();
             }
 
+			public Task GetEventsInAProject(AsanaProject asanaProject, String string1, AsanaResponseEventHandler callback)
+			{
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetEventsInAProject), asanaProject, string1);
+				return request.Go((o, h) => PackAndSendResponse<AsanaEvent>(o, callback), ErrorCallback);
+			}
+
+            public Task<AsanaEvent> GetEventsInAProjectAsync(AsanaProject asanaProject, String string1)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetEventsInAProject), asanaProject, string1);
+                return request.GoAsync<AsanaEvent>(true);
+            }
+
+			public Task GetEventsInTask(AsanaTask asanaTask, String string1, AsanaResponseEventHandler callback)
+			{
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetEventsInTask), asanaTask, string1);
+				return request.Go((o, h) => PackAndSendResponse<AsanaEvent>(o, callback), ErrorCallback);
+			}
+
+            public Task<AsanaEvent> GetEventsInTaskAsync(AsanaTask asanaTask, String string1)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetEventsInTask), asanaTask, string1);
+                return request.GoAsync<AsanaEvent>(true);
+            }
+
 
 
 
@@ -483,6 +509,36 @@ namespace AsanaNet
 			}
 
 
+			public Task Get<AsanaT>(AsanaProject arg1,  String arg2, AsanaResponseEventHandler callback) where AsanaT : AsanaObject
+			{
+				AsanaRequest request = default(AsanaRequest);
+								
+				if(typeof(AsanaT) == typeof(AsanaEvent))
+				{
+					request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetEventsInAProject), arg1, arg2);
+					return request.Go((o, h) => PackAndSendResponse<AsanaEvent>(o, callback), ErrorCallback);
+				}
+
+								
+                throw new TypeAccessException("Unknown type for this request: " + typeof(AsanaT).Name);
+			}
+
+
+			public Task Get<AsanaT>(AsanaTask arg1,  String arg2, AsanaResponseEventHandler callback) where AsanaT : AsanaObject
+			{
+				AsanaRequest request = default(AsanaRequest);
+								
+				if(typeof(AsanaT) == typeof(AsanaEvent))
+				{
+					request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetEventsInTask), arg1, arg2);
+					return request.Go((o, h) => PackAndSendResponse<AsanaEvent>(o, callback), ErrorCallback);
+				}
+
+								
+                throw new TypeAccessException("Unknown type for this request: " + typeof(AsanaT).Name);
+			}
+
+
 
 	}
 
@@ -510,6 +566,8 @@ namespace AsanaNet
 				Functions.Add(Function.GetTagById, new AsanaFunction("/tags/{0}", "GET"));
 				Functions.Add(Function.GetTeamsInWorkspace, new AsanaFunction("/organizations/{0:ID}/teams", "GET"));
 				Functions.Add(Function.GetProjectsInTeam, new AsanaFunction("/teams/{0:ID}/projects", "GET"));
+				Functions.Add(Function.GetEventsInAProject, new AsanaFunction("/projects/{0:ID}/events?sync={1}", "GET"));
+				Functions.Add(Function.GetEventsInTask, new AsanaFunction("/tasks/{0:ID}/events?sync={1}", "GET"));
 				Functions.Add(Function.CreateWorkspaceTask, new AsanaFunction("/tasks", "POST"));
 				Functions.Add(Function.AddProjectToTask, new AsanaFunction("/tasks/{0:ID}/addProject", "POST"));
 				Functions.Add(Function.RemoveProjectFromTask, new AsanaFunction("/tasks/{0:ID}/removeProject", "POST"));

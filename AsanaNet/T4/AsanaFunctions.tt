@@ -43,7 +43,8 @@ foreach (System.Xml.XmlNode function in functionList)
 	}
 			
 	bool isCollection = false;
-	bool.TryParse(function.Attributes["collection"].Value, out isCollection);
+	if (function.Attributes["collection"] != null)
+		bool.TryParse(function.Attributes["collection"].Value, out isCollection);
 	string packMethodString = isCollection ? "PackAndSendResponseCollection" : "PackAndSendResponse";
 	string responseTypeString = isCollection ? "AsanaCollectionResponseEventHandler" : "AsanaResponseEventHandler";
 
@@ -97,6 +98,8 @@ namespace AsanaNet
 				{
 					var paramName = new StringBuilder(parameters[i].Trim());
 					paramName[0] = Char.ToLower(paramName[0]);
+					if (paramName.ToString() == "string")					
+						paramName.Append(i);
 											
 					parameterStringWithType += parameters[i].Trim() + " " + paramName; // + (i+1);
 					if(i < parameters.Length-1)
@@ -111,13 +114,20 @@ namespace AsanaNet
 			}
 
 			bool isCollection = false;
-			bool.TryParse(function.Attributes["collection"].Value, out isCollection);
+			bool respectOriginalStructure = false;
+			if (function.Attributes["collection"] != null)
+				bool.TryParse(function.Attributes["collection"].Value, out isCollection);
+			if (function.Attributes["respectOriginalStructure"] != null)
+				bool.TryParse(function.Attributes["respectOriginalStructure"].Value, out respectOriginalStructure);
+
 			string packMethodString = isCollection ? "PackAndSendResponseCollection" : "PackAndSendResponse";
 			string responseTypeString = isCollection ? "AsanaCollectionResponseEventHandler" : "AsanaResponseEventHandler";
 			string goAsyncMethodString = isCollection ? "GoCollectionAsync" : "GoAsync";
 			string resultTypeString = function.Attributes["return"].Value;
 			if (isCollection)			
-				resultTypeString = "IAsanaObjectCollection<" + resultTypeString + ">";				
+				resultTypeString = "IAsanaObjectCollection<" + resultTypeString + ">";
+
+			string respectOriginalStructureString = respectOriginalStructure ? "true" : "";
 			
 #>
 			public Task <#= function.Attributes["name"].Value #>(<#= parameterStringWithType #><#= secondArgumentComma #><#=responseTypeString#> callback)
@@ -129,7 +139,7 @@ namespace AsanaNet
             public Task<<#= resultTypeString #>> <#= function.Attributes["name"].Value #>Async(<#= parameterStringWithType #>)
             {
                 var request = GetBaseRequest(AsanaFunction.GetFunction(Function.<#= function.Attributes["name"].Value #>)<#=parameterStringNoType#>);
-                return request.<#= goAsyncMethodString #><<#= function.Attributes["return"].Value #>>();
+                return request.<#= goAsyncMethodString #><<#= function.Attributes["return"].Value #>>(<#= respectOriginalStructureString #>);
             }
 
 <#		} 
@@ -170,7 +180,8 @@ foreach (KeyValuePair<string, List<System.Xml.XmlNode>> functions in functionByP
 					}
 			
 					bool isCollection = false;
-					bool.TryParse(function.Attributes["collection"].Value, out isCollection);
+					if (function.Attributes["collection"] != null)
+						bool.TryParse(function.Attributes["collection"].Value, out isCollection);
 					string packMethodString = isCollection ? "PackAndSendResponseCollection" : "PackAndSendResponse";
 					string responseTypeString = isCollection ? "AsanaCollectionResponseEventHandler" : "AsanaResponseEventHandler";
 

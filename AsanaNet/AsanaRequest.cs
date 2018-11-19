@@ -118,13 +118,13 @@ namespace AsanaNet
         /// <summary>
         /// Begins the request
         /// </summary> <Task>
-        public async Task<TAsanaObject> GoAsync<TAsanaObject>()
+        public async Task<TAsanaObject> GoAsync<TAsanaObject>(bool respectOriginalStructure = false)
             where TAsanaObject : AsanaObject
         {
             if (_throttling)
                 _throttlingWaitHandle.WaitOne();
-
-            using (var response = await _request.GetResponseAsync())
+                            
+            using (var response = await GetWebResponseAsync(_request))
             {
                 if (response.Headers["Retry-After"] != null)
                 {
@@ -132,17 +132,37 @@ namespace AsanaNet
                     ThrottleFor(Convert.ToInt32(retryAfter));
                     return await GoAsync<TAsanaObject>();
                 }
-                
+
                 using (var dataStream = response.GetResponseStream())
                 using (var reader = new StreamReader(dataStream))
                 {
                     var responseFromServer = reader.ReadToEnd();
-                    var result = PackAndSendResponse<TAsanaObject>(responseFromServer);
-                    return result;
+                    if (respectOriginalStructure)
+                    {
+                        var result = PackOriginalContent<TAsanaObject>(responseFromServer);
+                        return result;
+                    }
+                    else
+                    {
+                        var result = PackAndSendResponse<TAsanaObject>(responseFromServer);
+                        return result;
+                    }
                 }
             }
         }
-        
+
+        private async Task<WebResponse> GetWebResponseAsync(HttpWebRequest request)
+        {
+            try
+            {
+                return await request.GetResponseAsync();
+            }
+            catch (WebException e)
+            {
+                return e.Response;
+            }
+        }
+
         /// <summary>
         /// Begins the request
         /// </summary> <Task>
@@ -172,6 +192,14 @@ namespace AsanaNet
         }
                 
         #region Json deserealize utils
+
+        private T PackOriginalContent<T>(string rawData) where T : AsanaObject
+        {
+            var data = Json.Deserialize(rawData) as Dictionary<string, object>;
+            var u = AsanaObject.Create(typeof(T));
+            Parsing.Deserialize(data, u, _host);
+            return (T) u;
+        }
         
         /// <summary>
         /// Packs the data and into a response object and sends it to the callback
