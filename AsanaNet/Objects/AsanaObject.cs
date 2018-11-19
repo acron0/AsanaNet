@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -138,24 +139,44 @@ namespace AsanaNet
             return ID.GetHashCode();
         }
 
-        public virtual Task Refresh()
+        public virtual Task Refresh(Asana host = null)
+        {
+            return RefreshAsync(host);
+        }
+
+        public virtual Task RefreshAsync(Asana host = null)
         {
             throw new NotImplementedException();
         }
+
+        protected internal void CheckHost(Asana host)
+        {            
+            if ((host ?? Host) == null)
+                throw new NullReferenceException("Host not set to remote data update.");
+        }
     }
 
-    public interface IAsanaObjectCollection : IList<AsanaObject>
+    public interface IAsanaObjectCollection : IList
     {
     }
 
+    public interface IAsanaObjectCollection<T> : IAsanaObjectCollection, IList<T> where T : AsanaObject
+    {        
+    }
+     
     [Serializable]
-    public class AsanaObjectCollection : List<AsanaObject>, IAsanaObjectCollection
+    public class AsanaObjectCollection<T> : List<T>, IAsanaObjectCollection<T> where T : AsanaObject
     {
     }
-
-    static public class IAsanaObjectCollectionExtensions
+    
+    [Serializable]
+    public class AsanaObjectCollection : AsanaObjectCollection<AsanaObject>
     {
-        static public List<Task> RefreshAll<T>(this IAsanaObjectCollection objects) where T : AsanaObject
+    }       
+
+    public static class AsanaObjectCollectionExtensions
+    {
+        public static List<Task> RefreshAll<T>(this IAsanaObjectCollection objects) where T : AsanaObject
         {
             List<Task> workers = new List<Task>();
             foreach (T o in objects)
@@ -168,38 +189,38 @@ namespace AsanaNet
         }
     }
 
-    static public class AsanaObjectExtensions
+    public static class AsanaObjectExtensions
     {
-        static public Task Save(this AsanaObject obj, Asana host, AsanaFunction function)
+        public static Task Save(this AsanaObject obj, Asana host, AsanaFunction function)
         {
             return host.Save(obj, function);
         }
 
-        static public Task Save(this AsanaObject obj, Asana host)
+        public static Task Save(this AsanaObject obj, Asana host)
         {
             return host.Save(obj, null);
         }
 
-        static public Task Save(this AsanaObject obj, AsanaFunction function)
+        public static Task Save(this AsanaObject obj, AsanaFunction function)
         {
             if (obj.Host == null)
                 throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
             return obj.Host.Save(obj, function);
         }
 
-        static public Task Save(this AsanaObject obj)
+        public static Task Save(this AsanaObject obj)
         {
             if (obj.Host == null)
                 throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");
             return obj.Host.Save(obj, null);
         }
 
-        static public Task Delete(this AsanaObject obj, Asana host)
+        public static Task Delete(this AsanaObject obj, Asana host)
         {
             return host.Delete(obj);
         }
 
-        static public Task Delete(this AsanaObject obj)
+        public static Task Delete(this AsanaObject obj)
         {
             if (obj.Host == null)
                 throw new NullReferenceException("This AsanaObject does not have a host associated with it so you must specify one when saving.");

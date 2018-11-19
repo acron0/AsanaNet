@@ -4,6 +4,7 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System" #>
 <#@ import namespace="System.IO" #>
+<#@ import namespace="System.Text" #>
 <#
  System.Xml.XmlDocument configurationData = new System.Xml.XmlDocument(); 
  configurationData.Load(this.Host.ResolvePath("AsanaFunctionDefinitions.xml"));
@@ -42,7 +43,8 @@ foreach (System.Xml.XmlNode function in functionList)
 	}
 			
 	bool isCollection = false;
-	bool.TryParse(function.Attributes["collection"].Value, out isCollection);
+	if (function.Attributes["collection"] != null)
+		bool.TryParse(function.Attributes["collection"].Value, out isCollection);
 	string packMethodString = isCollection ? "PackAndSendResponseCollection" : "PackAndSendResponse";
 	string responseTypeString = isCollection ? "AsanaCollectionResponseEventHandler" : "AsanaResponseEventHandler";
 
@@ -94,15 +96,16 @@ namespace AsanaNet
 			{
 				if(!string.IsNullOrWhiteSpace(parameters[i]))
 				{
+					var paramName = new StringBuilder(parameters[i].Trim());
+					paramName[0] = Char.ToLower(paramName[0]);
+					if (paramName.ToString() == "string")					
+						paramName.Append(i);
+											
+					parameterStringWithType += parameters[i].Trim() + " " + paramName; // + (i+1);
 					if(i < parameters.Length-1)
-					{
-						parameterStringWithType += parameters[i] + " arg" + (i+1) + ", ";
-					}
-					else
-					{
-						parameterStringWithType += parameters[i] + " arg" + (i+1);
-					}
-					parameterStringNoType += ", arg" + (i+1);
+						parameterStringWithType += ", ";					
+
+					parameterStringNoType += ", " + paramName; // + (i+1);
 				}
 				if(!string.IsNullOrWhiteSpace(parameterStringWithType))
 				{
@@ -111,9 +114,21 @@ namespace AsanaNet
 			}
 
 			bool isCollection = false;
-			bool.TryParse(function.Attributes["collection"].Value, out isCollection);
+			bool respectOriginalStructure = false;
+			if (function.Attributes["collection"] != null)
+				bool.TryParse(function.Attributes["collection"].Value, out isCollection);
+			if (function.Attributes["respectOriginalStructure"] != null)
+				bool.TryParse(function.Attributes["respectOriginalStructure"].Value, out respectOriginalStructure);
+
 			string packMethodString = isCollection ? "PackAndSendResponseCollection" : "PackAndSendResponse";
 			string responseTypeString = isCollection ? "AsanaCollectionResponseEventHandler" : "AsanaResponseEventHandler";
+			string goAsyncMethodString = isCollection ? "GoCollectionAsync" : "GoAsync";
+			string resultTypeString = function.Attributes["return"].Value;
+			if (isCollection)			
+				resultTypeString = "IAsanaObjectCollection<" + resultTypeString + ">";
+
+			string respectOriginalStructureString = respectOriginalStructure ? "true" : "";
+			
 #>
 			public Task <#= function.Attributes["name"].Value #>(<#= parameterStringWithType #><#= secondArgumentComma #><#=responseTypeString#> callback)
 			{
@@ -121,7 +136,11 @@ namespace AsanaNet
 				return request.Go((o, h) => <#=packMethodString#><<#= function.Attributes["return"].Value #>>(o, callback), ErrorCallback);
 			}
 
-
+            public Task<<#= resultTypeString #>> <#= function.Attributes["name"].Value #>Async(<#= parameterStringWithType #>)
+            {
+                var request = GetBaseRequest(AsanaFunction.GetFunction(Function.<#= function.Attributes["name"].Value #>)<#=parameterStringNoType#>);
+                return request.<#= goAsyncMethodString #><<#= function.Attributes["return"].Value #>>(<#= respectOriginalStructureString #>);
+            }
 
 <#		} 
 #>
@@ -143,8 +162,7 @@ foreach (KeyValuePair<string, List<System.Xml.XmlNode>> functions in functionByP
 				
 					string[] parameters = function.Attributes["parameters"].Value.Split(',');
 					string parameterStringWithType = "";
-					string parameterStringNoType = "";
-					string secondArgumentComma = "";
+					string parameterStringNoType = "";					
 					for(int i = 0; i < parameters.Length; ++i)
 					{
 						if(!string.IsNullOrWhiteSpace(parameters[i]))
@@ -159,14 +177,11 @@ foreach (KeyValuePair<string, List<System.Xml.XmlNode>> functions in functionByP
 							}
 							parameterStringNoType += ", arg" + (i+1);
 						}
-						if(!string.IsNullOrWhiteSpace(parameterStringWithType))
-						{
-							secondArgumentComma = ", ";
-						}
 					}
 			
 					bool isCollection = false;
-					bool.TryParse(function.Attributes["collection"].Value, out isCollection);
+					if (function.Attributes["collection"] != null)
+						bool.TryParse(function.Attributes["collection"].Value, out isCollection);
 					string packMethodString = isCollection ? "PackAndSendResponseCollection" : "PackAndSendResponse";
 					string responseTypeString = isCollection ? "AsanaCollectionResponseEventHandler" : "AsanaResponseEventHandler";
 

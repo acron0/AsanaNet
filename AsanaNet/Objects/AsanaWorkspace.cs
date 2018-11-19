@@ -30,13 +30,12 @@ namespace AsanaNet
             return Create(typeof(AsanaWorkspace), ID) as AsanaWorkspace;
         }
 
-        public override Task Refresh()
+        public override async Task RefreshAsync(Asana host = null)
         {
-            return Host.GetWorkspaceById(ID, workspace =>
-            {
-                Name = (workspace as AsanaWorkspace).Name;
-                IsOrganization = (workspace as AsanaWorkspace).IsOrganization;
-            });
+            CheckHost(host);
+            var workspace = await (Host ?? host).GetWorkspaceByIdAsync(ID);
+            Name = workspace.Name;
+            IsOrganization = workspace.IsOrganization;
         }
     }
 }
