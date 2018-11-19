@@ -53,7 +53,7 @@ To create a new task:
     newTask1.DueOn = DateTime.Now.AddHours(2);
     newTask1.Save(asana);
 
-###Error callback method
+### Error callback method
 The error callback method may be in the following form:
 
     static void errorCallback(string s1, string s2, string s3)
@@ -65,5 +65,5 @@ Also, if you don't want handling anything, you can just pass an empty lambda int
 
     _asana = new Asana(_apiKey, AuthenticationType.Basic, (s1, s2, s3) => {});
 
-###Notes
+### Notes
 * Certain versions of Visual Studio (usually 2013 and above) don't ship with T4. If this is the case, you can install T4 via NuGet (https://www.nuget.org/packages/T4/)
