@@ -74,20 +74,19 @@ namespace AsanaNet
             Team = team;
         }
 
-        public override Task Refresh()
+        public override async Task RefreshAsync(Asana host = null)
         {
-            return Host.GetProjectById(ID, project =>
-            {
-                Name = (project as AsanaProject).Name;
-                CreatedAt = (project as AsanaProject).CreatedAt;
-                ModifiedAt = (project as AsanaProject).ModifiedAt;
-                Notes = (project as AsanaProject).Notes;
-                Archived = (project as AsanaProject).Archived;
-                Workspace = (project as AsanaProject).Workspace;
-                Followers = (project as AsanaProject).Followers;
-                Team = (project as AsanaProject).Team;
-                Color = (project as AsanaProject).Color;
-            });
+            CheckHost(host);
+            var project = await (host ?? Host).GetProjectByIdAsync(ID);
+            Name = project.Name;
+            CreatedAt = project.CreatedAt;
+            ModifiedAt = project.ModifiedAt;
+            Notes = project.Notes;
+            Archived = project.Archived;
+            Workspace = project.Workspace;
+            Followers = project.Followers;
+            Team = project.Team;
+            Color = project.Color;
         }
     }
 }

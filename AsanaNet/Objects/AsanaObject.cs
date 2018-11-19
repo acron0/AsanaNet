@@ -139,9 +139,20 @@ namespace AsanaNet
             return ID.GetHashCode();
         }
 
-        public virtual Task Refresh()
+        public virtual Task Refresh(Asana host = null)
+        {
+            return RefreshAsync(host);
+        }
+
+        public virtual Task RefreshAsync(Asana host = null)
         {
             throw new NotImplementedException();
+        }
+
+        protected internal void CheckHost(Asana host)
+        {            
+            if ((host ?? Host) == null)
+                throw new NullReferenceException("Host not set to remote data update.");
         }
     }
 
