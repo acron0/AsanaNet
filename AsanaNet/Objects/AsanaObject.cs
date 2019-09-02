@@ -20,7 +20,7 @@ namespace AsanaNet
     [Serializable]
     public abstract class AsanaObject
     {
-        [AsanaDataAttribute("id", SerializationFlags.Omit)]
+        [AsanaDataAttribute("gid", SerializationFlags.Omit)]
         public Int64 ID { get; protected set; }
 
         public Asana Host { get; protected set; }
