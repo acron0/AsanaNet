@@ -41,7 +41,7 @@ namespace AsanaNet
         internal bool IsDirty(string key, object value)
         {
             object lvalue = null;
-            if(_lastSave.TryGetValue(key, out lvalue))
+            if(_lastSave != null && _lastSave.TryGetValue(key, out lvalue))
             {
                 return !value.Equals(lvalue);
             }

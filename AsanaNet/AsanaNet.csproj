@@ -65,10 +65,14 @@
     <Compile Include="AsanaAttributes.cs" />
     <Compile Include="AsanaDateTime.cs" />
     <Compile Include="AsanaFunction.cs" />
+    <Compile Include="Objects\AsanaDuplicateProjectJob.cs" />
+    <Compile Include="Objects\AsanaDuplicateProjectSettings.cs" />
     <Compile Include="Objects\AsanaEventItem.cs" />
+    <Compile Include="Objects\AsanaJob.cs" />
     <Compile Include="Objects\AsanaObject.cs" />
     <Compile Include="AsanaRequest.cs" />
     <Compile Include="Objects\AsanaProject.cs" />
+    <Compile Include="Objects\AsanaScheduleDates.cs" />
     <Compile Include="Objects\AsanaStory.cs" />
     <Compile Include="Objects\AsanaTag.cs" />
     <Compile Include="Objects\AsanaTask.cs" />

@@ -29,6 +29,8 @@ Copyright 2012 Antony WOods
   <Function method="GET" name="GetTasksByTag"           formation="/tags/{0:ID}/tasks"                        parameters="AsanaTag"                     return="AsanaTask"          collection="true"   />
   <Function method="GET" name="GetStoryById"            formation="/stories/{0}"                              parameters="Int64"                        return="AsanaStory"         collection="false"  />
   <Function method="GET" name="GetProjectById"          formation="/projects/{0}"                             parameters="Int64"                        return="AsanaProject"       collection="false"  />
+  <Function method="GET" name="GetJobById"              formation="/jobs/{0}"                                 parameters="Int64"                        return="AsanaJob"           collection="false"  />
+  <Function method="GET" name="GetTeamById"             formation="/teams/{0}"                                parameters="Int64"                        return="AsanaTeam"          collection="false"  />
   <Function method="GET" name="GetTasksInAProject"      formation="/projects/{0:ID}/tasks"                    parameters="AsanaProject"                 return="AsanaTask"          collection="true"   />
   <Function method="GET" name="GetTagById"              formation="/tags/{0}"                                 parameters="Int64"                        return="AsanaTag"           collection="false"  />
   <Function method="GET" name="GetTeamsInWorkspace"     formation="/organizations/{0:ID}/teams"               parameters="AsanaWorkspace"               return="AsanaTeam"          collection="true"   />
@@ -45,6 +47,7 @@ Copyright 2012 Antony WOods
   <Function method="POST" name="RemoveTagFromTask"      formation="/tasks/{0:ID}/removeTag"                   parameters="AsanaTask"                                                                    />
   <Function method="POST" name="CreateWorkspaceProject" formation="/projects"                                 parameters="AsanaWorkspace, AsanaTeam"                                                    />
   <Function method="POST" name="CreateWorkspaceTag"     formation="/tags"                                     parameters="AsanaWorkspace"                                                               />
+  <Function method="POST" name="DuplicateProject"       formation="/projects/{0}/duplicate"                   parameters="Int64"                                                                        />
 
   <!-- PUT Functions -->                                                                                                                              
   <Function method="PUT" name="UpdateTask"              formation="/tasks/{0:ID}"                             parameters="AsanaTask"                                                                    />

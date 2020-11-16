@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AsanaNet.Objects;
+using System;
 using System.Threading.Tasks;
 /*
 * THIS FILE IS GENERATED! DO NOT EDIT!
@@ -24,6 +25,8 @@ namespace AsanaNet
 			GetTasksByTag,
 			GetStoryById,
 			GetProjectById,
+			GetJobById,
+			GetTeamById,
 			GetTasksInAProject,
 			GetTagById,
 			GetTeamsInWorkspace,
@@ -44,6 +47,7 @@ namespace AsanaNet
 			UpdateWorkspace,
 			DeleteTask,
 			DeleteProject,
+			DuplicateProject
 		}
 
 		// Function definitions specifically for the GET functions.
@@ -221,6 +225,25 @@ namespace AsanaNet
 			{
 				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetProjectById), int64);
 				return request.Go((o, h) => PackAndSendResponse<AsanaProject>(o, callback), ErrorCallback);
+			}
+
+			public Task GetJobById(Int64 int64, AsanaResponseEventHandler callback)
+			{
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetJobById), int64);
+				return request.Go((o, h) => PackAndSendResponse<AsanaJob>(o, callback), ErrorCallback);
+			}
+
+			public Task GetTeamById(Int64 int64, AsanaResponseEventHandler callback)
+			{
+				var request = GetBaseRequest(AsanaFunction.GetFunction(Function.GetTeamById), int64);
+				return request.Go((o, h) => PackAndSendResponse<AsanaTeam>(o, callback), ErrorCallback);
+			}
+
+			public Task DuplicateProjectById(Int64 int64, AsanaDuplicateProjectSettings settings, AsanaResponseEventHandler callback)
+			{
+				var data = Parsing.Serialize(settings, true, false);
+				var request = GetBaseRequestWithParams(AsanaFunction.GetFunction(Function.DuplicateProject), data, int64);
+				return request.Go((o, h) => PackAndSendResponse<AsanaDuplicateProjectJob>(o, callback), ErrorCallback);
 			}
 
             public Task<AsanaProject> GetProjectByIdAsync(Int64 int64)
@@ -562,6 +585,8 @@ namespace AsanaNet
 				Functions.Add(Function.GetTasksByTag, new AsanaFunction("/tags/{0:ID}/tasks", "GET"));
 				Functions.Add(Function.GetStoryById, new AsanaFunction("/stories/{0}", "GET"));
 				Functions.Add(Function.GetProjectById, new AsanaFunction("/projects/{0}", "GET"));
+				Functions.Add(Function.GetJobById, new AsanaFunction("/jobs/{0}", "GET"));
+				Functions.Add(Function.GetTeamById, new AsanaFunction("/teams/{0}", "GET"));
 				Functions.Add(Function.GetTasksInAProject, new AsanaFunction("/projects/{0:ID}/tasks", "GET"));
 				Functions.Add(Function.GetTagById, new AsanaFunction("/tags/{0}", "GET"));
 				Functions.Add(Function.GetTeamsInWorkspace, new AsanaFunction("/organizations/{0:ID}/teams", "GET"));
@@ -582,7 +607,8 @@ namespace AsanaNet
 				Functions.Add(Function.UpdateWorkspace, new AsanaFunction("/workspaces/{0:ID}", "PUT"));
 				Functions.Add(Function.DeleteTask, new AsanaFunction("/tasks/{0:ID}", "DELETE"));
 				Functions.Add(Function.DeleteProject, new AsanaFunction("/projects/{0:ID}", "DELETE"));
-		
+				Functions.Add(Function.DuplicateProject, new AsanaFunction("/projects/{0}/duplicate", "POST"));
+
 
 				Associations.Add(typeof(AsanaWorkspace), new AsanaFunctionAssociation(null, GetFunction(Function.UpdateWorkspace), null));
 				Associations.Add(typeof(AsanaTask), new AsanaFunctionAssociation(GetFunction(Function.CreateWorkspaceTask), GetFunction(Function.UpdateTask), GetFunction(Function.DeleteTask)));
